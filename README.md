@@ -1,5 +1,27 @@
 # caelestia
 
+## ChrisBlackoutDev personal fork
+
+This branch is a personal, AI-assisted modification of the upstream
+[`caelestia-dots/caelestia`](https://github.com/caelestia-dots/caelestia)
+dotfiles. The base rice, installer, Hyprland layout, Caelestia Shell/CLI
+integration, and app theming come from the upstream project; the changes below
+are local customizations for my own Arch setup.
+
+Personal changes currently included:
+
+- Use Firefox for the `Super + W` browser shortcut instead of Zen Browser.
+- Add a Cursor desktop entry that launches
+  `~/Applications/cursor/cursor.AppImage`, so Cursor appears in the Caelestia
+  launcher opened with `Super`.
+- Add a Caelestia Shell config that changes idle locking to 30 minutes, with
+  display sleep and suspend delayed after that.
+- Replace the default active-window floating toggle with a current-workspace
+  toggle on `Super + Alt + Space`. The custom script toggles all windows on the
+  active workspace between tiled and floating, preserves tiled geometry when
+  entering floating mode, and uses screen position to produce a more intuitive
+  tiled layout when returning to tiling.
+
 This is the main repo of the caelestia dots and contains the user configs for
 apps. This repo also includes an install script to install the entire dots.
 

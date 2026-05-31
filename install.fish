@@ -78,6 +78,7 @@ end
 set -q _flag_noconfirm && set noconfirm '--noconfirm'
 set -q _flag_aur_helper && set -l aur_helper $_flag_aur_helper || set -l aur_helper paru
 set -q XDG_CONFIG_HOME && set -l config $XDG_CONFIG_HOME || set -l config $HOME/.config
+set -q XDG_DATA_HOME && set -l data $XDG_DATA_HOME || set -l data $HOME/.local/share
 set -q XDG_STATE_HOME && set -l state $XDG_STATE_HOME || set -l state $HOME/.local/state
 set -l install_dir (path dirname (path resolve (status filename)))
 
@@ -203,6 +204,20 @@ end
 if confirm-overwrite $config/btop
     log 'Installing btop config...'
     ln -s (realpath btop) $config/btop
+end
+
+# Caelestia shell personal config
+mkdir -p $config/caelestia
+if confirm-overwrite $config/caelestia/shell.json
+    log 'Installing Caelestia shell config...'
+    ln -s (realpath caelestia/shell.json) $config/caelestia/shell.json
+end
+
+# Application launchers
+mkdir -p $data/applications
+if confirm-overwrite $data/applications/cursor.desktop
+    log 'Installing Cursor desktop entry...'
+    ln -s (realpath applications/cursor.desktop) $data/applications/cursor.desktop
 end
 
 # Install spicetify

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Cursor
+Comment=AI code editor
+Exec=/home/kensa/Applications/cursor/cursor.AppImage %U
+Icon=cursor
+Terminal=false
+Categories=Development;IDE;
+StartupNotify=true
+StartupWMClass=Cursor

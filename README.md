@@ -22,6 +22,18 @@ Personal changes currently included:
   entering floating mode, and uses screen position to produce a more intuitive
   tiled layout when returning to tiling.
 
+Code-review fixes included in this fork:
+
+- Harden AUR-helper bootstrapping by building from a fresh temporary directory
+  and honoring `--noconfirm` during `makepkg`.
+- Fix workspace-group shortcuts for `Super + Ctrl + #` and workspace slots that
+  end in `0`.
+- Make first-run config creation less racy by seeding Hypr user config files
+  during install and sourcing default colours before generated colours.
+- Fix PiP initial placement, game tearing rules, Firefox package metadata,
+  Cursor desktop-entry portability, Zen profile handling, and VSCode/CaelestiaFox
+  integration error handling.
+
 This is the main repo of the caelestia dots and contains the user configs for
 apps. This repo also includes an install script to install the entire dots.
 
@@ -41,7 +53,7 @@ The install script has some options for installing configs for some apps.
 
 ```
 $ ./install.fish -h
-usage: ./install.sh [-h] [--noconfirm] [--spotify] [--vscode] [--discord] [--aur-helper]
+usage: ./install.fish [-h] [--noconfirm] [--spotify] [--vscode] [--discord] [--zen] [--aur-helper]
 
 options:
   -h, --help                  show this help message and exit
@@ -56,7 +68,7 @@ options:
 For example:
 
 ```sh
-git clone https://github.com/caelestia-dots/caelestia.git ~/.local/share/caelestia
+git clone https://github.com/ChrisBlackoutDev/caelestia.git ~/.local/share/caelestia
 ~/.local/share/caelestia/install.fish
 ```
 
@@ -83,7 +95,7 @@ Dependencies:
 -   eza
 -   adw-gtk-theme
 -   papirus-icon-theme
--   qtengine-git
+-   qtengine
 -   ttf-jetbrains-mono-nerd
 
 Install all dependencies and follow the installation guides of the
@@ -157,7 +169,7 @@ Here's a list of useful keybinds though:
 -   `Super` + `#` - switch to workspace `#`
 -   `Super` `Alt` + `#` - move window to workspace `#`
 -   `Super` + `T` - open terminal (foot)
--   `Super` + `W` - open browser (zen)
+-   `Super` + `W` - open browser (Firefox)
 -   `Super` + `C` - open IDE (vscodium)
 -   `Super` + `S` - toggle special workspace or close current special workspace
 -   `Ctrl` `Alt` + `Delete` - open session menu

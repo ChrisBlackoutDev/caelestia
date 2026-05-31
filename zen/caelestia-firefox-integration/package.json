@@ -1,9 +1,15 @@
 {
-    "name": "caelestiafox",
+    "name": "caelestia-firefox-integration",
     "version": "0.0.1",
     "license": "GPL-3.0-only",
+    "scripts": {
+        "build": "tsc -p .",
+        "watch": "tsc -w -p .",
+        "lint": "web-ext lint --source-dir ."
+    },
     "devDependencies": {
         "@types/firefox-webext-browser": "^120.0.4",
+        "typescript": "^5.7.2",
         "web-ext": "^8.4.0"
     }
 }

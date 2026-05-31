@@ -7,7 +7,7 @@ pkgver=r183.cf94e7f
 pkgrel=1
 pkgdesc='A metapackage containing all dependencies for the Caelestia dotfiles'
 arch=('any')
-url='https://github.com/caelestia-dots/caelestia'
+url='https://github.com/ChrisBlackoutDev/caelestia'
 license=('GPL-3.0-only')
 depends=('caelestia-cli' 'caelestia-shell'
          'hyprland' 'xdg-desktop-portal-hyprland' 'xdg-desktop-portal-gtk' 'hyprpicker'
@@ -17,7 +17,8 @@ depends=('caelestia-cli' 'caelestia-shell'
 optdepends=('thunar: file manager'
             'spotify: music player'
             'vscode: code editor'
-            'zen-browser: web browser'
+            'firefox: default web browser'
+            'zen-browser: optional Zen browser integration'
             'todoist-appimage: todo manager'
             'uwsm: uwsm session'
             'gnome-keyring: keyring daemon'

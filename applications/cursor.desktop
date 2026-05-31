@@ -2,7 +2,7 @@
 Type=Application
 Name=Cursor
 Comment=AI code editor
-Exec=/home/kensa/Applications/cursor/cursor.AppImage %U
+Exec=sh -c "exec \\$HOME/Applications/cursor/cursor.AppImage \"\\$@\"" cursor %U
 Icon=cursor
 Terminal=false
 Categories=Development;IDE;

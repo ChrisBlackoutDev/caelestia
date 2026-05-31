@@ -77,6 +77,11 @@ interface Message {
     colours: Colours;
 }
 
+const isObject = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
+
+const isMessage = (value: unknown): value is Message =>
+    isObject(value) && isObject(value.colours) && (value.mode === "dark" || value.mode === "light");
+
 const browserColours = (colours: Colours) => ({
     bookmark_text: colours.onSurface,
     button_background_hover: colours.surfaceContainerHigh,
@@ -131,10 +136,19 @@ darkReader.onDisconnect.addListener(() => {
     darkReader = null;
 });
 
-browser.runtime.connectNative("caelestiafox").onMessage.addListener(msg => {
+const caelestia = browser.runtime.connectNative("caelestiafox");
+caelestia.onDisconnect.addListener(() => {
+    console.log("Caelestia native app disconnected:", caelestia.error);
+});
+caelestia.onMessage.addListener(msg => {
     console.log("Received message:", msg);
 
-    const res = msg as Message;
+    if (!isMessage(msg)) {
+        console.warn("Ignoring malformed Caelestia scheme:", msg);
+        return;
+    }
+
+    const res = msg;
     const colours = Object.fromEntries(Object.entries(res.colours).map(([n, c]) => [n, `#${c}`])) as unknown as Colours;
     const theme: browser._manifest.ThemeType = {
         colors: browserColours(colours),

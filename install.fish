@@ -13,7 +13,7 @@ or exit
 
 # Print help
 if set -q _flag_h
-    echo 'usage: ./install.sh [-h] [--noconfirm] [--spotify] [--vscode] [--discord] [--aur-helper]'
+    echo 'usage: ./install.fish [-h] [--noconfirm] [--spotify] [--vscode] [--discord] [--zen] [--aur-helper]'
     echo
     echo 'options:'
     echo '  -h, --help                  show this help message and exit'
@@ -133,12 +133,26 @@ if ! pacman -Q $aur_helper &> /dev/null
 
     # Install
     sudo pacman -S --needed git base-devel $noconfirm
-    cd /tmp
-    git clone https://aur.archlinux.org/$aur_helper.git
-    cd $aur_helper
-    makepkg -si
-    cd ..
-    rm -rf $aur_helper
+    set -l build_dir (mktemp -d --tmpdir "caelestia-$aur_helper.XXXXXXXXXX")
+    or exit 1
+
+    git clone --depth=1 https://aur.archlinux.org/$aur_helper.git $build_dir
+    or begin
+        rm -rf -- $build_dir
+        exit 1
+    end
+
+    cd $build_dir
+    or begin
+        rm -rf -- $build_dir
+        exit 1
+    end
+
+    makepkg -si $noconfirm
+    set -l makepkg_status $status
+    cd $install_dir
+    rm -rf -- $build_dir
+    test $makepkg_status -eq 0 || exit $makepkg_status
 
     # Setup
     if test $aur_helper = yay
@@ -151,6 +165,8 @@ end
 
 # Cd into dir
 cd $install_dir || exit 1
+mkdir -p $config/caelestia
+touch $config/caelestia/hypr-vars.conf $config/caelestia/hypr-user.conf
 
 # Install metapackage for deps
 log 'Installing metapackage...'
@@ -207,7 +223,6 @@ if confirm-overwrite $config/btop
 end
 
 # Caelestia shell personal config
-mkdir -p $config/caelestia
 if confirm-overwrite $config/caelestia/shell.json
     log 'Installing Caelestia shell config...'
     ln -s (realpath caelestia/shell.json) $config/caelestia/shell.json
@@ -251,6 +266,7 @@ if set -q _flag_vscode
     test "$_flag_vscode" = 'code' && set -l packages 'code' || set -l packages 'vscodium-bin' 'vscodium-bin-marketplace'
     test "$_flag_vscode" = 'code' && set -l folder 'Code' || set -l folder 'VSCodium'
     set -l folder $config/$folder/User
+    mkdir -p $folder
 
     log "Installing vs$prog..."
     $aur_helper -S --needed $packages $noconfirm
@@ -286,10 +302,22 @@ if set -q _flag_zen
     $aur_helper -S --needed zen-browser-bin $noconfirm
 
     # Install userChrome css
-    set -l chrome $HOME/.zen/*/chrome
-    if confirm-overwrite $chrome/userChrome.css
-        log 'Installing zen userChrome...'
-        ln -s (realpath zen/userChrome.css) $chrome/userChrome.css
+    set -l zen_profiles
+    if test -d $HOME/.zen
+        set zen_profiles (find $HOME/.zen -mindepth 1 -maxdepth 1 -type d 2> /dev/null)
+    end
+
+    if test (count $zen_profiles) -eq 0
+        log 'No Zen profiles found; skipping zen userChrome.'
+    else
+        for profile in $zen_profiles
+            set -l chrome $profile/chrome
+            mkdir -p $chrome
+            if confirm-overwrite $chrome/userChrome.css
+                log "Installing zen userChrome to $chrome..."
+                ln -s (realpath zen/userChrome.css) $chrome/userChrome.css
+            end
+        end
     end
 
     # Install native app

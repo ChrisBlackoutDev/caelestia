@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=OrcaSlicer
+Exec=env GDK_SCALE=2 GDK_DPI_SCALE=0.75 /opt/orca-slicer/AppRun %U
+Icon=OrcaSlicer
+Terminal=false
+Categories=Utility;
+MimeType=model/stl;application/vnd.ms-3mfdocument;application/prs.wavefront-obj;application/x-amf;x-scheme-handler/orcaslicer;x-scheme-handler/bambustudio;

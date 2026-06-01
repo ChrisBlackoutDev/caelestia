@@ -230,9 +230,11 @@ end
 
 # Application launchers
 mkdir -p $data/applications
-if confirm-overwrite $data/applications/cursor.desktop
-    log 'Installing Cursor desktop entry...'
-    ln -s (realpath applications/cursor.desktop) $data/applications/cursor.desktop
+for desktop in cursor.desktop steam.desktop OrcaSlicer.desktop
+    if confirm-overwrite $data/applications/$desktop
+        log "Installing $desktop desktop entry..."
+        ln -s (realpath applications/$desktop) $data/applications/$desktop
+    end
 end
 
 # Install spicetify
@@ -256,99 +258,112 @@ if set -q _flag_spotify
 
         # Set spicetify configs
         spicetify config current_theme caelestia color_scheme caelestia custom_apps marketplace 2> /dev/null
+        spicetify config inject_css 1 replace_colors 1 overwrite_assets 1 inject_theme_js 1
         spicetify apply
     end
 end
 
-# Install vscode
-if set -q _flag_vscode
-    test "$_flag_vscode" = 'code' && set -l prog 'code' || set -l prog 'codium'
-    test "$_flag_vscode" = 'code' && set -l packages 'code' || set -l packages 'vscodium-bin' 'vscodium-bin-marketplace'
-    test "$_flag_vscode" = 'code' && set -l folder 'Code' || set -l folder 'VSCodium'
-    set -l folder $config/$folder/User
-    mkdir -p $folder
+# Discord
+if set -q _flag_discord
+    log 'Installing Discord (Equicord + OpenAsar)...'
 
-    log "Installing vs$prog..."
+    $aur_helper -S --needed vesktop-bin $noconfirm
+
+    # Equicord Vesktop settings
+    if confirm-overwrite $config/vesktop/settings
+        log 'Installing Equicord Vesktop settings...'
+        ln -s (realpath vesktop/settings) $config/vesktop/settings
+    end
+
+    # Discord theme
+    mkdir -p $config/vesktop/themes
+    if confirm-overwrite $config/vesktop/themes/caelestia.theme.css
+        log 'Installing Discord theme...'
+        ln -s (realpath vesktop/caelestia.theme.css) $config/vesktop/themes/caelestia.theme.css
+    end
+end
+
+# VSCodium/Code
+if set -q _flag_vscode
+    switch $_flag_vscode
+        case codium
+            set -l packages vscodium-bin vscodium-marketplace
+            set -l prog VSCodium
+            set -l folder $config/VSCodium/User
+        case code
+            set -l packages visual-studio-code-bin
+            set -l prog Code
+            set -l folder $config/Code/User
+    end
+
+    log "Installing $prog..."
+
     $aur_helper -S --needed $packages $noconfirm
 
-    # Install configs
-    if confirm-overwrite $folder/settings.json && confirm-overwrite $folder/keybindings.json && confirm-overwrite $config/$prog-flags.conf
-        log "Installing vs$prog config..."
+    # Configs
+    mkdir -p $folder
+    if confirm-overwrite $folder/settings.json
+        log "Installing $prog settings..."
         ln -s (realpath vscode/settings.json) $folder/settings.json
         ln -s (realpath vscode/keybindings.json) $folder/keybindings.json
         ln -s (realpath vscode/flags.conf) $config/$prog-flags.conf
+    end
 
-        # Install extension
-        $prog --install-extension vscode/caelestia-vscode-integration/caelestia-vscode-integration-*.vsix
+    # Extension
+    $argv = $config/$prog-flags.conf
+    set -l code_cmd (string lower $prog)
+    if ! $code_cmd --list-extensions | grep -q 'caelestia-vscode-integration'
+        log "Installing $prog extension..."
+        $code_cmd --install-extension vscode/caelestia-vscode-integration/caelestia-vscode-integration-*.vsix
     end
 end
 
-# Install discord
-if set -q _flag_discord
-    log 'Installing discord...'
-    $aur_helper -S --needed discord equicord-installer-bin $noconfirm
-
-    # Install OpenAsar and Equicord
-    sudo Equilotl -install -location /opt/discord
-    sudo Equilotl -install-openasar -location /opt/discord
-
-    # Remove installer
-    $aur_helper -Rns equicord-installer-bin $noconfirm
-end
-
-# Install zen
+# Zen
 if set -q _flag_zen
-    log 'Installing zen...'
+    log 'Installing Zen...'
+
     $aur_helper -S --needed zen-browser-bin $noconfirm
 
-    # Install userChrome css
-    set -l zen_profiles
-    if test -d $HOME/.zen
-        set zen_profiles (find $HOME/.zen -mindepth 1 -maxdepth 1 -type d 2> /dev/null)
+    # Native app
+    set -l lib $HOME/.mozilla/native-messaging-hosts
+    mkdir -p $lib
+    if confirm-overwrite $lib/caelestiafox
+        log 'Installing native app...'
+        ln -s (realpath zen/native_app/app.fish) $lib/caelestiafox
+        chmod u+x $lib/caelestiafox
     end
 
-    if test (count $zen_profiles) -eq 0
-        log 'No Zen profiles found; skipping zen userChrome.'
-    else
-        for profile in $zen_profiles
-            set -l chrome $profile/chrome
-            mkdir -p $chrome
-            if confirm-overwrite $chrome/userChrome.css
-                log "Installing zen userChrome to $chrome..."
-                ln -s (realpath zen/userChrome.css) $chrome/userChrome.css
-            end
+    # Native app manifest
+    if confirm-overwrite $lib/caelestiafox.json
+        log 'Installing native app manifest...'
+        ln -s (realpath zen/native_app/manifest.json) $lib/caelestiafox.json
+    end
+
+    # Extension
+    set -l tmp (mktemp -d)
+    cp -r zen/caelestia-firefox-integration $tmp/caelestia-firefox-integration
+    cd $tmp/caelestia-firefox-integration
+    npm install
+    npm run build
+    cd $install_dir
+
+    log 'Installing Zen extension...'
+    for profile in $HOME/.zen/*
+        set -l profile_name (path basename $profile)
+        set -l extensions $profile/extensions
+        set -l chrome $profile/chrome
+
+        mkdir -p $extensions $chrome
+        cp $tmp/caelestia-firefox-integration/caelestia-firefox-integration.xpi $extensions/caelestia-firefox-integration@caelestia.local.xpi
+
+        # User chrome
+        if confirm-overwrite $chrome/userChrome.css
+            log "Installing user chrome for profile $profile_name..."
+            ln -s (realpath zen/userChrome.css) $chrome/userChrome.css
         end
     end
 
-    # Install native app
-    set -l hosts $HOME/.mozilla/native-messaging-hosts
-    set -l lib $HOME/.local/lib/caelestia
-
-    if confirm-overwrite $hosts/caelestiafox.json
-        log 'Installing zen native app manifest...'
-        mkdir -p $hosts
-        cp zen/native_app/manifest.json $hosts/caelestiafox.json
-        sed -i "s|{{ \$lib }}|$lib|g" $hosts/caelestiafox.json
-    end
-
-    if confirm-overwrite $lib/caelestiafox
-        log 'Installing zen native app...'
-        mkdir -p $lib
-        ln -s (realpath zen/native_app/app.fish) $lib/caelestiafox
-    end
-
-    # Prompt user to install extension
-    log 'Please install the CaelestiaFox extension from https://addons.mozilla.org/en-US/firefox/addon/caelestiafox if you have not already done so.'
+    rm -rf $tmp
 end
-
-# Generate scheme stuff if needed
-if ! test -f $state/caelestia/scheme.json
-    caelestia scheme set -n shadotheme
-    sleep .5
-    hyprctl reload
-end
-
-# Start the shell
-caelestia shell -d > /dev/null
 
 log 'Done!'

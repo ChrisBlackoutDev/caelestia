@@ -73,6 +73,16 @@ function confirm-overwrite -a path
     return 0
 end
 
+function add-gtk-bookmark -a bookmarks_file folder name
+    set -l resolved (path resolve $folder 2> /dev/null)
+    test -n "$resolved" || set resolved $folder
+
+    set -l bookmark "file://"(string escape --style=url $resolved)" $name"
+    if ! contains -- $bookmark (cat $bookmarks_file 2> /dev/null)
+        echo $bookmark >> "$bookmarks_file"
+    end
+end
+
 
 # Variables
 set -q _flag_noconfirm && set noconfirm '--noconfirm'
@@ -84,14 +94,14 @@ set -l install_dir (path dirname (path resolve (status filename)))
 
 # Startup prompt
 set_color magenta
-echo '╭─────────────────────────────────────────────────╮'
+echo '╭───────────────────────────────────────────────╮'
 echo '│      ______           __          __  _         │'
 echo '│     / ____/___ ____  / /__  _____/ /_(_)___ _   │'
 echo '│    / /   / __ `/ _ \/ / _ \/ ___/ __/ / __ `/   │'
 echo '│   / /___/ /_/ /  __/ /  __(__  ) /_/ / /_/ /    │'
 echo '│   \____/\__,_/\___/_/\___/____/\__/_/\__,_/     │'
 echo '│                                                 │'
-echo '╰─────────────────────────────────────────────╯'
+echo '╰────────────────────────────────────────────╯'
 set_color normal
 log 'Welcome to the Caelestia dotfiles installer!'
 log 'Before continuing, please ensure you have made a backup of your config directory.'
@@ -177,6 +187,39 @@ else
     $aur_helper -Ui $noconfirm
 end
 fish -c 'rm -f caelestia-meta-*.pkg.tar.zst' 2> /dev/null
+
+# File explorer defaults
+if command -q xdg-user-dirs-update
+    xdg-user-dirs-update
+end
+
+set -l downloads_dir (xdg-user-dir DOWNLOAD 2> /dev/null)
+test -n "$downloads_dir" || set downloads_dir $HOME/Downloads
+
+set -l documents_dir (xdg-user-dir DOCUMENTS 2> /dev/null)
+test -n "$documents_dir" || set documents_dir $HOME/Documents
+
+mkdir -p $downloads_dir $documents_dir $config/gtk-3.0
+set -l gtk_bookmarks "$config/gtk-3.0/bookmarks"
+touch $gtk_bookmarks
+add-gtk-bookmark $gtk_bookmarks $downloads_dir Downloads
+add-gtk-bookmark $gtk_bookmarks $documents_dir Documents
+
+mkdir -p $config/Thunar $config/xfce4/xfconf/xfce-perchannel-xml
+if confirm-overwrite $config/Thunar/uca.xml
+    log 'Installing Thunar custom actions...'
+    cp thunar/uca.xml $config/Thunar/uca.xml
+end
+
+if confirm-overwrite $config/xfce4/xfconf/xfce-perchannel-xml/thunar.xml
+    log 'Installing Thunar defaults...'
+    cp thunar/thunar.xml $config/xfce4/xfconf/xfce-perchannel-xml/thunar.xml
+end
+
+if confirm-overwrite $config/xfce4/xfconf/xfce-perchannel-xml/thunar-volman.xml
+    log 'Installing Thunar volume management defaults...'
+    cp thunar/thunar-volman.xml $config/xfce4/xfconf/xfce-perchannel-xml/thunar-volman.xml
+end
 
 # Install hypr* configs
 if confirm-overwrite $config/hypr

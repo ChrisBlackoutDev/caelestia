@@ -14,7 +14,8 @@ depends=('caelestia-cli' 'caelestia-shell'
          'wl-clipboard' 'cliphist' 'inotify-tools' 'app2unit' 'wireplumber' 'trash-cli'
          'foot' 'fish' 'eza' 'fastfetch' 'starship' 'btop' 'jq' 'adw-gtk-theme'
          'papirus-icon-theme' 'qtengine' 'ttf-jetbrains-mono-nerd'
-         'thunar' 'thunar-volman' 'gvfs' 'xdg-user-dirs' 'polkit-gnome')
+         'thunar' 'thunar-volman' 'gvfs' 'xdg-user-dirs' 'polkit-gnome'
+         'exfatprogs' 'dosfstools')
 optdepends=('gvfs-mtp: MTP support for phones and media players in Thunar'
             'gvfs-gphoto2: PTP camera support in Thunar'
             'spotify: music player'

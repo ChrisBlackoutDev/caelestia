@@ -83,6 +83,12 @@ function add-gtk-bookmark -a bookmarks_file folder name
     end
 end
 
+function set-xfconf -a channel property type value
+    if command -q xfconf-query
+        xfconf-query -c $channel -p $property -n -t $type -s $value > /dev/null 2>&1
+    end
+end
+
 
 # Variables
 set -q _flag_noconfirm && set noconfirm '--noconfirm'
@@ -217,9 +223,14 @@ if confirm-overwrite $config/xfce4/xfconf/xfce-perchannel-xml/thunar.xml
 end
 
 if confirm-overwrite $config/xfce4/xfconf/xfce-perchannel-xml/thunar-volman.xml
-    log 'Installing Thunar volume management defaults...'
+    log 'Installing Thunar volume defaults...'
     cp thunar/thunar-volman.xml $config/xfce4/xfconf/xfce-perchannel-xml/thunar-volman.xml
 end
+
+set-xfconf thunar /last-side-pane string ThunarShortcutsPane
+set-xfconf thunar /misc-volume-management bool true
+set-xfconf thunar-volman /automount-drives/enabled bool false
+set-xfconf thunar-volman /automount-media/enabled bool false
 
 # Install hypr* configs
 if confirm-overwrite $config/hypr

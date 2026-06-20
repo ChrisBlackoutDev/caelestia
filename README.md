@@ -178,3 +178,4 @@ Here's a list of useful keybinds though:
 -   `Super` + `S` - toggle special workspace or close current special workspace
 -   `Ctrl` `Alt` + `Delete` - open session menu
 -   `Ctrl` `Super` + `Space` - toggle media play state
+-   `Ctrl` `Super` `Alt` + `R` - restart the shell

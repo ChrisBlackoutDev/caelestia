@@ -20,6 +20,8 @@ Personal changes currently included:
   [`ChrisBlackoutDev/shell-fork`](https://github.com/ChrisBlackoutDev/shell-fork)
   after the metapackage install so local shell fixes are used instead of the
   stock AUR release.
+- Install Thunar thumbnail services and enable thumbnails on removable drives
+  so image previews and media cover thumbnails appear in the file explorer.
 - Replace the default active-window floating toggle with a current-workspace
   toggle on `Super + Alt + Space`. The custom script toggles all windows on the
   active workspace between tiled and floating, preserves tiled geometry when

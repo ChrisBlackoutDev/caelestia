@@ -254,6 +254,7 @@ end
 
 set-xfconf thunar /last-side-pane string ThunarShortcutsPane
 set-xfconf thunar /misc-volume-management bool true
+set-xfconf thunar /misc-thumbnail-mode string THUNAR_THUMBNAIL_MODE_ALWAYS
 set-xfconf thunar-volman /automount-drives/enabled bool false
 set-xfconf thunar-volman /automount-media/enabled bool false
 

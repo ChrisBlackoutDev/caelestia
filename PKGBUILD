@@ -9,7 +9,7 @@ pkgdesc='A metapackage containing all dependencies for the Caelestia dotfiles'
 arch=('any')
 url='https://github.com/ChrisBlackoutDev/caelestia'
 license=('GPL-3.0-only')
-depends=('caelestia-cli' 'caelestia-shell'
+depends=('caelestia-cli' 'caelestia-shell' 'git' 'base-devel' 'cmake' 'ninja'
          'hyprland' 'xdg-desktop-portal-hyprland' 'xdg-desktop-portal-gtk' 'hyprpicker'
          'wl-clipboard' 'cliphist' 'inotify-tools' 'app2unit' 'wireplumber' 'trash-cli'
          'foot' 'fish' 'eza' 'fastfetch' 'starship' 'btop' 'jq' 'adw-gtk-theme'

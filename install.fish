@@ -89,6 +89,29 @@ function set-xfconf -a channel property type value
     end
 end
 
+function install-forked-shell -a data noconfirm
+    set -l shell_repo https://github.com/ChrisBlackoutDev/shell-fork.git
+    set -l shell_dir $data/caelestia-shell-fork
+
+    log 'Installing Caelestia Shell from ChrisBlackoutDev/shell-fork...'
+    sudo pacman -S --needed git base-devel cmake ninja $noconfirm
+
+    if test -d $shell_dir/.git
+        git -C $shell_dir pull --ff-only
+    else
+        rm -rf $shell_dir
+        git clone $shell_repo $shell_dir
+    end
+    or exit 1
+
+    cmake -S $shell_dir -B $shell_dir/build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/ -DDISTRIBUTOR='ChrisBlackoutDev/shell-fork'
+    or exit 1
+    cmake --build $shell_dir/build
+    or exit 1
+    sudo cmake --install $shell_dir/build
+    or exit 1
+end
+
 
 # Variables
 set -q _flag_noconfirm && set noconfirm '--noconfirm'
@@ -193,6 +216,8 @@ else
     $aur_helper -Ui $noconfirm
 end
 fish -c 'rm -f caelestia-meta-*.pkg.tar.zst' 2> /dev/null
+
+install-forked-shell $data $noconfirm
 
 # File explorer defaults
 if command -q xdg-user-dirs-update

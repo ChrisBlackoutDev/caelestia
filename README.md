@@ -16,6 +16,10 @@ Personal changes currently included:
   launcher opened with `Super`.
 - Add a Caelestia Shell config that changes idle locking to 30 minutes, with
   display sleep and suspend delayed after that.
+- Install Caelestia Shell from
+  [`ChrisBlackoutDev/shell-fork`](https://github.com/ChrisBlackoutDev/shell-fork)
+  after the metapackage install so local shell fixes are used instead of the
+  stock AUR release.
 - Replace the default active-window floating toggle with a current-workspace
   toggle on `Super + Alt + Space`. The custom script toggles all windows on the
   active workspace between tiled and floating, preserves tiled geometry when
@@ -174,4 +178,3 @@ Here's a list of useful keybinds though:
 -   `Super` + `S` - toggle special workspace or close current special workspace
 -   `Ctrl` `Alt` + `Delete` - open session menu
 -   `Ctrl` `Super` + `Space` - toggle media play state
--   `Ctrl` `Super` `Alt` + `R` - restart the shell

@@ -2,6 +2,14 @@
 
 set -l active_ws (hyprctl activeworkspace -j | jq -r '.id')
 set -l clients (hyprctl clients -j)
+set -l runtime_dir (set -q XDG_RUNTIME_DIR; and echo $XDG_RUNTIME_DIR; or echo /tmp)
+set -l state_dir "$runtime_dir/caelestia"
+set -l state_file "$state_dir/windowed-workspaces"
+set -l state_ws
+
+if test -f "$state_file"
+    set state_ws (string split \n -- (cat "$state_file"))
+end
 
 set -l tiled_count (
     printf '%s' "$clients" | jq -r --argjson ws "$active_ws" '
@@ -19,7 +27,10 @@ set -l tiled_count (
 set -l dispatcher
 set -l message
 
-if test "$tiled_count" -gt 0
+if contains -- "$active_ws" $state_ws
+    set dispatcher settiled
+    set message 'Workspace windows tiled'
+else if test "$tiled_count" -gt 0
     set dispatcher setfloating
     set message 'Workspace windows floating'
 else
@@ -79,4 +90,23 @@ for window in $windows
 end
 
 hyprctl --batch (string join '; ' $batch)
+
+set -l next_state
+for ws in $state_ws
+    if test -n "$ws"; and test "$ws" != "$active_ws"
+        set -a next_state "$ws"
+    end
+end
+
+if test "$dispatcher" = setfloating
+    mkdir -p "$state_dir"
+    set -a next_state "$active_ws"
+end
+
+if test (count $next_state) -gt 0
+    printf '%s\n' $next_state > "$state_file"
+else
+    rm -f "$state_file"
+end
+
 notify-send -u low -i view-grid-symbolic -a Shell 'Window layout' "$message"

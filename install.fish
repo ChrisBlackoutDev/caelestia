@@ -308,6 +308,13 @@ if confirm-overwrite $config/caelestia/shell.json
     ln -s (realpath caelestia/shell.json) $config/caelestia/shell.json
 end
 
+# AI assistant helper panel
+mkdir -p $config/quickshell
+if confirm-overwrite $config/quickshell/caelestia-ai
+    log 'Installing AI assistant helper panel...'
+    ln -s (realpath quickshell/caelestia-ai) $config/quickshell/caelestia-ai
+end
+
 # Application launchers
 mkdir -p $data/applications
 for desktop in cursor.desktop steam.desktop OrcaSlicer.desktop

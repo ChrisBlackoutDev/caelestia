@@ -27,6 +27,8 @@ Personal changes currently included:
   active workspace between tiled and floating, preserves tiled geometry when
   entering floating mode, and uses screen position to produce a more intuitive
   tiled layout when returning to tiling.
+- Add a top-right Quickshell AI assistant helper panel with a narrow edge
+  trigger zone so it does not open accidentally while moving around the desktop.
 
 Code-review fixes included in this fork:
 

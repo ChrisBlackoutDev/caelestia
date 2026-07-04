@@ -1,4 +1,12 @@
 {
+    "dashboard": {
+        "mediaUpdateInterval": 1500,
+        "performance": {
+            "showGpu": false,
+            "showNetwork": false
+        },
+        "resourceUpdateInterval": 3000
+    },
     "general": {
         "idle": {
             "timeouts": [
@@ -20,5 +28,8 @@
                 }
             ]
         }
+    },
+    "nexus": {
+        "networkRescanInterval": 60000
     }
 }

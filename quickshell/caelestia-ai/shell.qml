@@ -34,10 +34,18 @@ ShellRoot {
     property string settingsContextText: "18"
     property string settingsInstructionsText: customInstructions
     property string settingsApiKeyText: ""
+    property string approvedCommand: ""
+    property string approvalBusyCommand: ""
+    property int approvalMessageIndex: -1
+    property bool scrollToEndPending: false
+    property int scrollToEndPasses: 0
+    property var historyView: null
+    property var inputField: null
 
     function showPanel(): void {
         hideTimer.stop();
         open = true;
+        focusInput();
     }
 
     function closePanel(): void {
@@ -48,6 +56,13 @@ ShellRoot {
         if (settingsOpen)
             return;
         hideTimer.restart();
+    }
+
+    function focusInput(): void {
+        Qt.callLater(() => {
+            if (open && !settingsOpen && inputField)
+                inputField.forceActiveFocus();
+        });
     }
 
     function openSettings(): void {
@@ -89,13 +104,85 @@ ShellRoot {
             content,
             pending: false
         });
-        Qt.callLater(() => history.positionViewAtEnd());
+        scheduleScrollToEnd();
+    }
+
+    function historyMaxY(): real {
+        const view = historyView;
+        if (!view)
+            return 0;
+        return Math.max(historyMinY(), historyMinY() + view.contentHeight - view.height);
+    }
+
+    function historyMinY(): real {
+        const view = historyView;
+        if (!view)
+            return 0;
+        return view.originY || 0;
+    }
+
+    function isHistoryNearBottom(threshold: real): bool {
+        const view = historyView;
+        if (!view)
+            return true;
+        return historyMaxY() - view.contentY <= threshold;
+    }
+
+    function clampHistoryScroll(): void {
+        const view = historyView;
+        if (!view)
+            return;
+        const minY = historyMinY();
+        const maxY = historyMaxY();
+        const clamped = root.clamp(view.contentY, minY, maxY);
+        if (Math.abs(view.contentY - clamped) > 0.5)
+            view.contentY = clamped;
+    }
+
+    function scheduleClampHistoryScroll(): void {
+        Qt.callLater(() => root.clampHistoryScroll());
+    }
+
+    function scrollHistoryToEnd(): void {
+        const view = historyView;
+        if (!view)
+            return;
+        view.forceLayout();
+        if (messages.count > 0)
+            view.positionViewAtIndex(messages.count - 1, ListView.End);
+        else
+            view.positionViewAtEnd();
+        view.positionViewAtEnd();
+        view.contentY = historyMaxY();
+        if (scrollToEndPasses > 0)
+            scrollToEndPasses -= 1;
+        scrollToEndPending = scrollToEndPasses > 0;
+        if (scrollToEndPending && typeof scrollEndTimer !== "undefined")
+            scrollEndTimer.restart();
+    }
+
+    function scheduleScrollToEnd(): void {
+        scrollToEndPending = true;
+        scrollToEndPasses = Math.max(scrollToEndPasses, 6);
+        Qt.callLater(() => {
+            if (root.historyView)
+                root.scrollHistoryToEnd();
+        });
+        if (typeof scrollEndTimer !== "undefined")
+            scrollEndTimer.restart();
+    }
+
+    function scheduleScrollToEndIfNearBottom(): void {
+        if (isHistoryNearBottom(96))
+            scheduleScrollToEnd();
+        else
+            scheduleClampHistoryScroll();
     }
 
     function requestMessages(): var {
         const out = [{
             role: "system",
-            content: "You are a local AI helper panel running inside the user's Hyprland/Caelestia desktop. The local user is kensa, HOME is /home/kensa, and the default working directory is /home/kensa. You have access to a small local tool bridge for non-destructive shell commands, text file reads, directory listings, screenshots, web search, and read-only hyprctl queries. Use tools when they directly help answer the user, and prefer one focused tool call over many broad ones. Destructive commands, package installation/removal, sudo, service changes, and filesystem writes are blocked unless an approval flow is added later. If a tool is blocked, explain that plainly and suggest the next safe step. Summarize tool output clearly after it runs. Do not emit XML, DSML, raw function-call markup, or hidden control syntax; the panel will render tool results for you.\n\nUser instructions:\n" + customInstructions
+            content: "You are a local AI helper panel running inside the user's Hyprland/Caelestia desktop. The local user is kensa, HOME is /home/kensa, and the default working directory is /home/kensa. You have access to a small local tool bridge for shell commands, text file reads, directory listings, screenshots, web search, image search, and read-only hyprctl queries. Use tools when they directly help answer the user, and prefer one focused tool call over many broad ones. Destructive commands, package operations, sudo, service changes, and write-heavy commands require an explicit user approval card before they run. If approval is required, say what the command will do and wait for the user to approve it in the panel. Screenshots and image-search results are rendered inline by the panel. Do not emit XML, DSML, raw function-call markup, or hidden control syntax; the panel will render tool results for you.\n\nUser instructions:\n" + customInstructions
         }];
 
         const start = Math.max(0, messages.count - maxContextMessages);
@@ -123,6 +210,60 @@ ShellRoot {
             .replace(/&amp;/g, "&");
     }
 
+    function encodeEntities(text: string): string {
+        return (text || "").replace(/&/g, "&amp;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&apos;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+    }
+
+    function imageSource(src: string): string {
+        const value = (src || "").trim();
+        if (!value)
+            return "";
+        if (/^(https?:|file:|qrc:)/.test(value))
+            return value;
+        if (value.startsWith("/"))
+            return "file://" + value;
+        return value;
+    }
+
+    function approveCommand(command: string, messageIndex: var): void {
+        const trimmed = (command || "").trim();
+        if (!trimmed || approvalBusyCommand)
+            return;
+        approvedCommand = trimmed;
+        approvalBusyCommand = trimmed;
+        approvalMessageIndex = typeof messageIndex === "number" ? messageIndex : -1;
+        status = qsTr("Running approved command");
+        approvedTimeoutTimer.restart();
+        approvedProc.exec(["/home/kensa/.local/bin/caelestia-ai-agent", "--approved-shell-command", trimmed]);
+    }
+
+    function rejectCommand(command: string, messageIndex: var): void {
+        const trimmed = (command || "").trim();
+        const content = root.toolResultCard(qsTr("Command approval declined"), trimmed, qsTr("The command was not run."), "declined");
+        if (typeof messageIndex === "number" && messageIndex >= 0 && messageIndex < messages.count) {
+            messages.set(messageIndex, {
+                role: "assistant",
+                content,
+                pending: false
+            });
+            scheduleScrollToEnd();
+        } else {
+            pushMessage("assistant", content);
+        }
+    }
+
+    function approvalCard(command: string, output: string): string {
+        return toolResultCard(qsTr("Command needs approval"), command, output, "approval");
+    }
+
+    function toolResultCard(title: string, command: string, output: string, cardStatus: string): string {
+        return `<|CAELESTIA|tool_result title="${encodeEntities(title)}" status="${encodeEntities(cardStatus)}"><|CAELESTIA|command>${encodeEntities(command)}</|CAELESTIA|command><|CAELESTIA|output>${encodeEntities(output)}</|CAELESTIA|output></|CAELESTIA|tool_result>`;
+    }
+
     function normaliseToolMarkup(text: string): string {
         return text.replace(/<\s*\|\s*DSML\s*\|\s*/g, "<|DSML|")
             .replace(/<\/\s*\|\s*DSML\s*\|\s*/g, "</|DSML|");
@@ -146,13 +287,23 @@ ShellRoot {
             const body = match[2];
             const commandMatch = /<\|CAELESTIA\|command>([\s\S]*?)<\/\|CAELESTIA\|command>/.exec(body);
             const outputMatch = /<\|CAELESTIA\|output>([\s\S]*?)<\/\|CAELESTIA\|output>/.exec(body);
+            const images = [];
+            const imageRe = /<\|CAELESTIA\|image\s+([^>]*)><\/\|CAELESTIA\|image>/g;
+            let imageMatch;
+            while ((imageMatch = imageRe.exec(body)) !== null) {
+                images.push({
+                    src: attr(imageMatch[1], "src", ""),
+                    title: attr(imageMatch[1], "title", "")
+                });
+            }
             parts.push({
                 type: "result",
                 name: "tool",
                 description: attr(attrs, "title", "Tool result"),
                 status: attr(attrs, "status", "ok"),
                 command: commandMatch ? root.decodeEntities(commandMatch[1].trim()) : "",
-                output: outputMatch ? root.decodeEntities(outputMatch[1].trim()) : ""
+                output: outputMatch ? root.decodeEntities(outputMatch[1].trim()) : "",
+                images
             });
             last = resultRe.lastIndex;
         }
@@ -176,105 +327,18 @@ ShellRoot {
         const source = text.trim();
         if (!source)
             return;
-
-        const fenceRe = /```([A-Za-z0-9_-]*)\n?([\s\S]*?)```/g;
-        let last = 0;
-        let match;
-        let foundFence = false;
-
-        while ((match = fenceRe.exec(source)) !== null) {
-            foundFence = true;
-            appendTextAndCommandParts(parts, source.slice(last, match.index));
-            const lang = (match[1] || "").toLowerCase();
-            const body = match[2].trim();
-            if (["sh", "shell", "bash", "zsh", "fish", "console", "terminal"].includes(lang) || looksLikeCommand(body.split("\n")[0] || body)) {
-                parts.push({
-                    type: "tool",
-                    name: "terminal",
-                    description: "Suggested terminal command",
-                    command: body
-                });
-            } else {
-                parts.push({
-                    type: "text",
-                    text: match[0]
-                });
-            }
-            last = fenceRe.lastIndex;
-        }
-
-        if (foundFence) {
-            appendTextAndCommandParts(parts, source.slice(last));
-            return;
-        }
-
-        const lines = source.split("\n");
-        let textBuffer = [];
-        let commandBuffer = [];
-
-        function flushText(): void {
-            const joined = textBuffer.join("\n").trim();
-            if (joined)
-                parts.push({
-                    type: "text",
-                    text: joined
-                });
-            textBuffer = [];
-        }
-
-        function flushCommand(): void {
-            const joined = commandBuffer.join("\n").trim().replace(/^\$\s*/, "");
-            if (joined)
-                parts.push({
-                    type: "tool",
-                    name: "terminal",
-                    description: "Suggested terminal command",
-                    command: joined
-                });
-            commandBuffer = [];
-        }
-
-        for (const line of lines) {
-            if (looksLikeCommand(line)) {
-                flushText();
-                commandBuffer.push(line);
-            } else {
-                flushCommand();
-                textBuffer.push(line);
-            }
-        }
-
-        flushCommand();
-        flushText();
+        parts.push({
+            type: "text",
+            text: source
+        });
     }
 
     function messageParts(text: string): var {
         const parts = [];
         const source = normaliseToolMarkup(parseCaelestiaToolResults(parts, text));
-        const invokeRe = /<\|DSML\|invoke\s+name="([^"]+)"[\s\S]*?<\/\|DSML\|invoke>/g;
-        let last = 0;
-        let match;
-
-        while ((match = invokeRe.exec(source)) !== null) {
-            const before = source.slice(last, match.index)
-                .replace(/<\/?\|DSML\|tool_calls>/g, "")
-                .trim();
-            appendTextAndCommandParts(parts, before);
-
-            const block = match[0];
-            const descriptionMatch = /<\|DSML\|parameter\s+name="description"[^>]*>([\s\S]*?)<\/\|DSML\|parameter>/.exec(block);
-            const commandMatch = /<\|DSML\|parameter\s+name="command"[^>]*>([\s\S]*?)<\/\|DSML\|parameter>/.exec(block);
-            parts.push({
-                type: "tool",
-                name: match[1],
-                description: descriptionMatch ? decodeEntities(descriptionMatch[1].trim()) : "Suggested command",
-                command: commandMatch ? decodeEntities(commandMatch[1].trim()) : block
-            });
-            last = invokeRe.lastIndex;
-        }
-
-        const tail = source.slice(last)
+        const tail = source
             .replace(/<\/?\|DSML\|tool_calls>/g, "")
+            .replace(/<\|DSML\|invoke\b[\s\S]*?<\/\|DSML\|invoke>/g, "")
             .trim();
         appendTextAndCommandParts(parts, tail);
 
@@ -298,23 +362,47 @@ ShellRoot {
             content: "Thinking...",
             pending: true
         });
+        scheduleScrollToEnd();
 
         busy = true;
         status = qsTr("Thinking");
+        requestTimeoutTimer.restart();
         requestProc.exec(["/home/kensa/.local/bin/caelestia-ai-agent"]);
         return true;
     }
 
+    function findPendingMessage(): int {
+        for (let i = messages.count - 1; i >= 0; i--) {
+            if (messages.get(i).pending)
+                return i;
+        }
+        return -1;
+    }
+
+    function failPendingRequest(message: string): void {
+        requestTimeoutTimer.stop();
+        if (requestProc.running)
+            requestProc.running = false;
+        busy = false;
+        const pendingIndex = findPendingMessage();
+        if (pendingIndex >= 0) {
+            messages.set(pendingIndex, {
+                role: "error",
+                content: message,
+                pending: false
+            });
+        } else {
+            pushMessage("error", message);
+        }
+        status = qsTr("Needs attention");
+        scheduleScrollToEnd();
+    }
+
     function completeRequest(exitCode: int): void {
+        requestTimeoutTimer.stop();
         busy = false;
 
-        let pendingIndex = -1;
-        for (let i = messages.count - 1; i >= 0; i--) {
-            if (messages.get(i).pending) {
-                pendingIndex = i;
-                break;
-            }
-        }
+        const pendingIndex = findPendingMessage();
 
         let response = {};
         try {
@@ -340,7 +428,60 @@ ShellRoot {
 
         activeModel = response.model || activeModel;
         status = ok ? qsTr("OpenRouter connected") : qsTr("Needs attention");
-        Qt.callLater(() => history.positionViewAtEnd());
+        scheduleScrollToEnd();
+    }
+
+    function completeApprovedCommand(exitCode: int): void {
+        approvedTimeoutTimer.stop();
+        let response = {};
+        try {
+            response = JSON.parse(approvedStdout.text || "{}");
+        } catch (error) {
+            response = {
+                ok: false,
+                error: "Approved command response was not valid JSON."
+            };
+        }
+
+        const ok = exitCode === 0 && response.ok;
+        const role = ok ? "assistant" : "error";
+        const content = ok ? response.content : (response.error || approvedStderr.text || "Approved command failed.");
+        if (approvalMessageIndex >= 0 && approvalMessageIndex < messages.count) {
+            messages.set(approvalMessageIndex, {
+                role,
+                content,
+                pending: false
+            });
+            scheduleScrollToEnd();
+        } else {
+            pushMessage(role, content);
+        }
+        approvalBusyCommand = "";
+        approvedCommand = "";
+        approvalMessageIndex = -1;
+        status = ok ? qsTr("Command complete") : qsTr("Needs attention");
+    }
+
+    function failApprovedCommand(message: string): void {
+        approvedTimeoutTimer.stop();
+        if (approvedProc.running)
+            approvedProc.running = false;
+        const command = approvedCommand || approvalBusyCommand;
+        const content = root.toolResultCard(qsTr("Approved command failed"), command, message, "error");
+        if (approvalMessageIndex >= 0 && approvalMessageIndex < messages.count) {
+            messages.set(approvalMessageIndex, {
+                role: "error",
+                content,
+                pending: false
+            });
+            scheduleScrollToEnd();
+        } else {
+            pushMessage("error", content);
+        }
+        approvalBusyCommand = "";
+        approvedCommand = "";
+        approvalMessageIndex = -1;
+        status = qsTr("Needs attention");
     }
 
     ListModel {
@@ -351,6 +492,121 @@ ShellRoot {
             content: "Hey. I am wired for chat through OpenRouter. Use the gear to set your key, model, and instructions."
             pending: false
         }
+    }
+
+    IpcHandler {
+        function submit(text: string): bool {
+            root.showPanel();
+            return root.send(text);
+        }
+
+        function messagesJson(): string {
+            const out = [];
+            for (let i = 0; i < messages.count; i++) {
+                const item = messages.get(i);
+                out.push({
+                    role: item.role,
+                    content: item.content,
+                    pending: item.pending
+                });
+            }
+            return JSON.stringify(out);
+        }
+
+        function approveLastApproval(): bool {
+            for (let i = messages.count - 1; i >= 0; i--) {
+                const parts = root.messageParts(messages.get(i).content);
+                for (const part of parts) {
+                    if (part.status === "approval" && part.command) {
+                        root.approveCommand(part.command, i);
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function declineLastApproval(): bool {
+            for (let i = messages.count - 1; i >= 0; i--) {
+                const parts = root.messageParts(messages.get(i).content);
+                for (const part of parts) {
+                    if (part.status === "approval" && part.command) {
+                        root.rejectCommand(part.command, i);
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function testApproval(command: string): void {
+            root.pushMessage("assistant", root.approvalCard(command, "Approval required: test approval card."));
+        }
+
+        function approve(command: string): void {
+            root.approveCommand(command, -1);
+        }
+
+        function testApproveInline(command: string): void {
+            root.pushMessage("assistant", root.approvalCard(command, "Approval required: test approval card."));
+            root.approveCommand(command, messages.count - 1);
+        }
+
+        function testImageCard(): void {
+            root.pushMessage("user", "image card scroll test");
+            root.pushMessage("assistant", "<|CAELESTIA|tool_result title=\"Image search results\" status=\"ok\"><|CAELESTIA|command>dolphin</|CAELESTIA|command><|CAELESTIA|output>- Dolphin photo result\n  https://pixnio.com/free-images/2025/01/08/2025-01-08-19-54-46-1536x1536.jpeg</|CAELESTIA|output><|CAELESTIA|image src=\"https://pixnio.com/free-images/2025/01/08/2025-01-08-19-54-46-1536x1536.jpeg\" title=\"Dolphin photo result\"></|CAELESTIA|image></|CAELESTIA|tool_result>");
+        }
+
+        function testLongChat(): void {
+            for (let i = 1; i <= 10; i++)
+                root.pushMessage(i % 2 === 0 ? "assistant" : "user", "Scroll test message " + i + "\\nThis verifies the chat follows new responses.");
+        }
+
+        function openPanel(): void {
+            root.showPanel();
+        }
+
+        function clear(): void {
+            while (messages.count > 1)
+                messages.remove(1);
+            root.busy = false;
+            root.status = qsTr("OpenRouter connected");
+            root.scheduleScrollToEnd();
+        }
+
+        function scrollNow(): void {
+            root.scheduleScrollToEnd();
+        }
+
+        function scrollBy(delta: real): void {
+            const view = root.historyView;
+            if (!view)
+                return;
+            view.contentY = root.clamp(view.contentY + delta, root.historyMinY(), root.historyMaxY());
+        }
+
+        function scrollDebug(): string {
+            const view = root.historyView;
+            return JSON.stringify({
+                count: messages.count,
+                contentY: view ? view.contentY : -1,
+                originY: view ? view.originY : -1,
+                contentHeight: view ? view.contentHeight : -1,
+                height: view ? view.height : -1,
+                minY: root.historyMinY(),
+                maxY: root.historyMaxY(),
+                pending: root.scrollToEndPending,
+                passes: root.scrollToEndPasses
+            });
+        }
+
+        function reset(): void {
+            root.failPendingRequest("Request cancelled. The panel has been unlocked.");
+            if (root.approvalBusyCommand)
+                root.failApprovedCommand("Approved command cancelled. The panel has been unlocked.");
+        }
+
+        target: "caelestiaAi"
     }
 
     Process {
@@ -370,6 +626,26 @@ ShellRoot {
             }) + "\n");
         }
         onExited: exitCode => root.completeRequest(exitCode)
+    }
+
+    Process {
+        id: approvedProc
+
+        stdout: StdioCollector {
+            id: approvedStdout
+        }
+        stderr: StdioCollector {
+            id: approvedStderr
+        }
+        onExited: exitCode => root.completeApprovedCommand(exitCode)
+    }
+
+    Timer {
+        id: approvedTimeoutTimer
+
+        interval: 120000
+        repeat: false
+        onTriggered: root.failApprovedCommand(qsTr("Approved command timed out. The panel has been unlocked so you can try again."))
     }
 
     Process {
@@ -429,6 +705,22 @@ ShellRoot {
         onTriggered: root.open = false
     }
 
+    Timer {
+        id: scrollEndTimer
+
+        interval: 60
+        repeat: false
+        onTriggered: root.scrollHistoryToEnd()
+    }
+
+    Timer {
+        id: requestTimeoutTimer
+
+        interval: 120000
+        repeat: false
+        onTriggered: root.failPendingRequest(qsTr("Request timed out. The panel has been unlocked so you can try again."))
+    }
+
     Component.onCompleted: {
         settingsProc.action = "load";
         settingsProc.exec(["/home/kensa/.local/bin/caelestia-ai-settings"]);
@@ -473,7 +765,7 @@ ShellRoot {
 
             WlrLayershell.namespace: "caelestia-ai"
             WlrLayershell.exclusionMode: ExclusionMode.Ignore
-            WlrLayershell.layer: WlrLayer.Top
+            WlrLayershell.layer: WlrLayer.Overlay
             WlrLayershell.keyboardFocus: root.open ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
             anchors.top: true
@@ -669,16 +961,41 @@ ShellRoot {
                         spacing: Tokens.spacing.small
                         clip: true
                         model: messages
+                        bottomMargin: Tokens.spacing.medium
                         boundsBehavior: Flickable.StopAtBounds
-                        flickDeceleration: 2500
-                        maximumFlickVelocity: 9000
+                        boundsMovement: Flickable.StopAtBounds
+                        flickDeceleration: 3200
+                        maximumFlickVelocity: 18000
+                        Component.onCompleted: {
+                            root.historyView = history;
+                            root.scheduleScrollToEnd();
+                        }
+                        Component.onDestruction: {
+                            if (root.historyView === history)
+                                root.historyView = null;
+                        }
+                        onMovementEnded: root.clampHistoryScroll()
+                        onFlickEnded: root.clampHistoryScroll()
+                        onContentHeightChanged: {
+                            if (root.scrollToEndPending)
+                                root.scheduleScrollToEnd();
+                            else
+                                root.scheduleClampHistoryScroll();
+                        }
+                        onHeightChanged: {
+                            if (root.scrollToEndPending)
+                                root.scheduleScrollToEnd();
+                            else
+                                root.scheduleClampHistoryScroll();
+                        }
 
                         WheelHandler {
                             acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
                             onWheel: event => {
-                                const maxY = Math.max(0, history.contentHeight - history.height);
-                                const delta = event.pixelDelta.y !== 0 ? event.pixelDelta.y * 2.5 : event.angleDelta.y * 2.4;
-                                history.contentY = root.clamp(history.contentY - delta, 0, maxY);
+                                const minY = root.historyMinY();
+                                const maxY = root.historyMaxY();
+                                const rawDelta = event.pixelDelta.y !== 0 ? event.pixelDelta.y * 1.8 : event.angleDelta.y;
+                                history.contentY = root.clamp(history.contentY - rawDelta, minY, maxY);
                                 event.accepted = true;
                             }
                         }
@@ -808,6 +1125,34 @@ ShellRoot {
                                                             }
                                                         }
 
+                                                        RowLayout {
+                                                            visible: part && part.status === "approval"
+                                                            Layout.fillWidth: true
+                                                            spacing: Tokens.spacing.small
+
+                                                            TextButton {
+                                                                Layout.fillWidth: true
+                                                                enabled: root.approvalBusyCommand.length === 0
+                                                                text: part && root.approvalBusyCommand === part.command ? qsTr("Running") : qsTr("Approve")
+                                                                type: TextButton.Filled
+                                                                onClicked: {
+                                                                    if (part)
+                                                                        root.approveCommand(part.command, row.index);
+                                                                }
+                                                            }
+
+                                                            TextButton {
+                                                                Layout.fillWidth: true
+                                                                enabled: root.approvalBusyCommand.length === 0
+                                                                text: qsTr("Decline")
+                                                                type: TextButton.Text
+                                                                onClicked: {
+                                                                    if (part)
+                                                                        root.rejectCommand(part.command, row.index);
+                                                                }
+                                                            }
+                                                        }
+
                                                         StyledRect {
                                                             visible: part.type === "result" && (part.output || "").length > 0
                                                             Layout.fillWidth: true
@@ -815,7 +1160,7 @@ ShellRoot {
                                                             radius: Tokens.rounding.small
                                                             color: Qt.alpha(Colours.palette.m3shadow, 0.2)
                                                             border.width: part.status === "ok" ? 0 : 1
-                                                            border.color: part.status === "blocked" ? Colours.palette.m3error : Qt.alpha(Colours.palette.m3outline, 0.4)
+                                                            border.color: part.status === "blocked" || part.status === "approval" || part.status === "declined" ? Colours.palette.m3error : Qt.alpha(Colours.palette.m3outline, 0.4)
 
                                                             Text {
                                                                 id: outputText
@@ -825,12 +1170,65 @@ ShellRoot {
                                                                 anchors.top: parent.top
                                                                 anchors.margins: Tokens.padding.small
                                                                 text: part.output || ""
-                                                                color: part.status === "blocked" ? Colours.palette.m3error : Colours.palette.m3onSurface
+                                                                color: part.status === "blocked" || part.status === "approval" || part.status === "declined" ? Colours.palette.m3error : Colours.palette.m3onSurface
                                                                 font.family: "monospace"
                                                                 font.pointSize: Tokens.font.body.small.pointSize
                                                                 wrapMode: Text.Wrap
                                                                 textFormat: Text.PlainText
                                                                 renderType: Text.NativeRendering
+                                                            }
+                                                        }
+
+                                                        Repeater {
+                                                            model: part.images || []
+
+                                                            ColumnLayout {
+                                                                required property var modelData
+
+                                                                Layout.fillWidth: true
+                                                                spacing: Tokens.spacing.small
+
+                                                                StyledRect {
+                                                                    Layout.fillWidth: true
+                                                                    Layout.preferredHeight: 150
+                                                                    radius: Tokens.rounding.small
+                                                                    color: Qt.alpha(Colours.palette.m3shadow, 0.2)
+                                                                    clip: true
+
+                                                                    Image {
+                                                                        id: previewImage
+
+                                                                        anchors.fill: parent
+                                                                        anchors.margins: Tokens.padding.small
+                                                                        source: root.imageSource(modelData.src)
+                                                                        asynchronous: true
+                                                                        cache: true
+                                                                        fillMode: Image.PreserveAspectFit
+                                                                        onStatusChanged: root.scheduleScrollToEndIfNearBottom()
+                                                                    }
+
+                                                                    StyledText {
+                                                                        anchors.centerIn: parent
+                                                                        width: parent.width - Tokens.padding.large * 2
+                                                                        visible: previewImage.status === Image.Loading || previewImage.status === Image.Error
+                                                                        text: previewImage.status === Image.Error ? qsTr("Image preview unavailable") : qsTr("Loading image")
+                                                                        color: Colours.palette.m3outline
+                                                                        font: Tokens.font.body.small
+                                                                        horizontalAlignment: Text.AlignHCenter
+                                                                        wrapMode: Text.Wrap
+                                                                    }
+                                                                }
+
+                                                                StyledText {
+                                                                    visible: (modelData.title || "").length > 0
+                                                                    Layout.fillWidth: true
+                                                                    text: modelData.title || ""
+                                                                    color: Colours.palette.m3outline
+                                                                    font: Tokens.font.body.small
+                                                                    wrapMode: Text.Wrap
+                                                                    maximumLineCount: 2
+                                                                    elide: Text.ElideRight
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -881,6 +1279,11 @@ ShellRoot {
                                 Keys.onEnterPressed: {
                                     if (root.send(text))
                                         text = "";
+                                }
+                                Component.onCompleted: root.inputField = input
+                                Component.onDestruction: {
+                                    if (root.inputField === input)
+                                        root.inputField = null;
                                 }
                             }
 
@@ -1102,7 +1505,7 @@ ShellRoot {
 
                                 StyledText {
                                     Layout.fillWidth: true
-                                    text: qsTr("Agent tools are still disabled. Future file edits, shell commands, package installs, Hyprland commands, web search, and sudo should require explicit approval.")
+                                    text: qsTr("Risky shell commands require explicit approval in chat. Screenshots and image search results render inline.")
                                     font: Tokens.font.body.small
                                     color: Colours.palette.m3outline
                                     wrapMode: Text.Wrap

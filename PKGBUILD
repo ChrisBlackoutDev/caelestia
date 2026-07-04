@@ -12,7 +12,7 @@ license=('GPL-3.0-only')
 depends=('caelestia-cli' 'caelestia-shell' 'git' 'base-devel' 'cmake' 'ninja'
          'hyprland' 'xdg-desktop-portal-hyprland' 'xdg-desktop-portal-gtk' 'hyprpicker'
          'wl-clipboard' 'cliphist' 'inotify-tools' 'app2unit' 'wireplumber' 'trash-cli'
-         'foot' 'fish' 'eza' 'fastfetch' 'starship' 'btop' 'tty-clock' 'cmatrix' 'jq' 'adw-gtk-theme'
+         'foot' 'fish' 'eza' 'fastfetch' 'starship' 'btop' 'tty-clock' 'cmatrix' 'pipes.sh' 'cava' 'jq' 'adw-gtk-theme'
          'papirus-icon-theme' 'qtengine' 'ttf-jetbrains-mono-nerd'
          'tumbler' 'ffmpegthumbnailer' 'gst-thumbnailers' 'gst-plugins-good' 'gst-plugins-bad' 'gst-plugins-ugly' 'gst-libav'
          'thunar' 'thunar-volman' 'gvfs' 'xdg-user-dirs' 'polkit-gnome'

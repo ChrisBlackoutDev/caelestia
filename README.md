@@ -29,10 +29,11 @@ Personal changes currently included:
   tiled layout when returning to tiling.
 - Add a top-right Quickshell AI assistant helper panel with a narrow edge
   trigger zone so it does not open accidentally while moving around the desktop.
-- Add fish wrappers for `tty-clock` and `cmatrix` so terminal toys follow the
-  active Caelestia wallpaper palette by default. `tty-clock` starts centered,
-  and both commands temporarily map ANSI green to the current Caelestia primary
-  colour while they run, then restore the generated terminal palette on exit.
+- Add fish wrappers for `tty-clock`, `cmatrix`, `pipes.sh`, and `cava` so
+  terminal toys follow the active Caelestia wallpaper palette by default.
+  `tty-clock` starts centered, `cmatrix` uses a transparent truecolour rain
+  renderer, `pipes.sh` restores the terminal palette after its reset-heavy
+  cleanup, and `cava` gets a fresh generated gradient on every launch.
 
 Code-review fixes included in this fork:
 
@@ -105,6 +106,8 @@ Dependencies:
 -   btop
 -   tty-clock
 -   cmatrix
+-   pipes.sh
+-   cava
 -   jq
 -   eza
 -   adw-gtk-theme
@@ -192,17 +195,25 @@ Here's a list of useful keybinds though:
 
 ### Terminal toys
 
-The fish config includes command wrappers for `tty-clock` and `cmatrix`:
+The fish config includes command wrappers for `tty-clock`, `cmatrix`,
+`pipes.sh`, and `cava`:
 
 -   `tty-clock` runs as `tty-clock -c -C 2`, so the clock is centered and uses
     ANSI green.
 -   `cmatrix` runs a Caelestia-themed renderer with a transparent terminal
     background and truecolour rain gradients from the active palette. Use
     `cmatrix --stock` to run `/usr/bin/cmatrix` instead.
+-   `pipes.sh` remaps ANSI pipe colours to the current Caelestia palette while
+    it runs and restores `~/.local/state/caelestia/sequences.txt` on exit. This
+    counteracts the upstream script's `tput reset` cleanup, which can otherwise
+    leave foot's terminal colours/transparency looking wrong.
+-   `cava` runs with a temporary config generated from the live Caelestia
+    palette, using the normal `~/.config/cava/config` as the base settings.
 
 The `tty-clock` wrapper reads `~/.local/state/caelestia/scheme.json` and
 temporarily remaps ANSI green to the current Caelestia `primary` colour. When
 the command exits, it prints `~/.local/state/caelestia/sequences.txt` to restore
 the generated terminal palette. The `cmatrix` renderer reads the same scheme
 file directly and only emits foreground colour sequences, preserving the
-terminal's transparent background.
+terminal's transparent background. The `pipes.sh` and `cava` wrappers also use
+the same scheme file at launch, so wallpaper changes are picked up in new runs.

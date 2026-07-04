@@ -13,14 +13,13 @@ from pathlib import Path
 CONFIG_PATH = Path.home() / ".config/cava/config"
 SCHEME_PATH = Path.home() / ".local/state/caelestia/scheme.json"
 FALLBACK_GRADIENT = (
-    "ffd8be",
-    "ffdb94",
-    "e1df87",
-    "f2b2f2",
-    "ffa2bd",
-    "ffbbc2",
-    "ffa9ab",
-    "faab9c",
+    "764639",
+    "eaa998",
+    "f9b7a5",
+    "e7bdb2",
+    "f8d291",
+    "ffe1b2",
+    "f9e0da",
 )
 
 
@@ -30,7 +29,15 @@ def valid_hex(value: str) -> bool:
 
 
 def load_gradient() -> list[str]:
-    names = ("green", "teal", "sky", "sapphire", "blue", "lavender", "mauve", "maroon")
+    names = (
+        "primaryContainer",
+        "primaryDim",
+        "primary",
+        "secondary",
+        "tertiaryDim",
+        "tertiary",
+        "text",
+    )
     try:
         with SCHEME_PATH.open(encoding="utf-8") as handle:
             colours = json.load(handle).get("colours", {})
@@ -65,6 +72,9 @@ def main() -> int:
     gradient = load_gradient()
     parser["color"]["gradient"] = "1"
     parser["color"]["gradient_count"] = str(len(gradient))
+    for key in tuple(parser["color"]):
+        if key.startswith("gradient_color_"):
+            parser["color"].pop(key, None)
     for index, colour in enumerate(gradient, start=1):
         parser["color"][f"gradient_color_{index}"] = f"'#{colour}'"
 

@@ -81,23 +81,22 @@ def load_palette() -> list[tuple[int, int, int]]:
 
 def make_drops(width: int, height: int, density: float, palette_size: int) -> list[Drop]:
     count = max(1, round(width * density))
-    columns = random.sample(range(width), min(width, count))
     return [
         Drop(
-            x=x,
-            y=random.uniform(-height, height),
-            speed=random.uniform(0.35, 1.25),
-            length=random.randint(max(5, height // 5), max(8, height // 2)),
+            x=random.randrange(width),
+            y=random.uniform(-height * 0.35, height),
+            speed=random.uniform(0.45, 1.45),
+            length=random.randint(max(8, height // 3), max(12, height * 3 // 4)),
             color_index=random.randrange(max(1, palette_size)),
         )
-        for x in columns
+        for _ in range(count)
     ]
 
 
 def reset_drop(drop: Drop, height: int, palette_size: int) -> None:
-    drop.y = random.uniform(-height, 0)
-    drop.speed = random.uniform(0.35, 1.25)
-    drop.length = random.randint(max(5, height // 5), max(8, height // 2))
+    drop.y = random.uniform(-drop.length, 0)
+    drop.speed = random.uniform(0.45, 1.45)
+    drop.length = random.randint(max(8, height // 3), max(12, height * 3 // 4))
     drop.color_index = random.randrange(max(1, palette_size))
 
 
@@ -201,7 +200,7 @@ def main(argv: list[str]) -> int:
     bold = (args.bold or args.all_bold) and not args.no_bold
     delay = min(10, max(0, args.delay))
     frame_time = 0.018 + delay * 0.012
-    density = 0.34
+    density = 1.15
     running = True
 
     def stop(_signum: int, _frame: object) -> None:

@@ -29,6 +29,10 @@ Personal changes currently included:
   tiled layout when returning to tiling.
 - Add a top-right Quickshell AI assistant helper panel with a narrow edge
   trigger zone so it does not open accidentally while moving around the desktop.
+- Add fish wrappers for `tty-clock` and `cmatrix` so terminal toys follow the
+  active Caelestia wallpaper palette by default. `tty-clock` starts centered,
+  and both commands temporarily map ANSI green to the current Caelestia primary
+  colour while they run, then restore the generated terminal palette on exit.
 
 Code-review fixes included in this fork:
 
@@ -99,6 +103,8 @@ Dependencies:
 -   fastfetch
 -   starship
 -   btop
+-   tty-clock
+-   cmatrix
 -   jq
 -   eza
 -   adw-gtk-theme
@@ -183,3 +189,17 @@ Here's a list of useful keybinds though:
 -   `Ctrl` `Alt` + `Delete` - open session menu
 -   `Ctrl` `Super` + `Space` - toggle media play state
 -   `Ctrl` `Super` `Alt` + `R` - restart the shell
+
+### Terminal toys
+
+The fish config includes command wrappers for `tty-clock` and `cmatrix`:
+
+-   `tty-clock` runs as `tty-clock -c -C 2`, so the clock is centered and uses
+    ANSI green.
+-   `cmatrix` runs as `cmatrix -C green`.
+
+Before either command starts, the wrapper reads
+`~/.local/state/caelestia/scheme.json` and temporarily remaps ANSI green to the
+current Caelestia `primary` colour. When the command exits, it prints
+`~/.local/state/caelestia/sequences.txt` to restore the generated terminal
+palette.

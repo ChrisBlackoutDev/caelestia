@@ -196,10 +196,13 @@ The fish config includes command wrappers for `tty-clock` and `cmatrix`:
 
 -   `tty-clock` runs as `tty-clock -c -C 2`, so the clock is centered and uses
     ANSI green.
--   `cmatrix` runs as `cmatrix -C green`.
+-   `cmatrix` runs a Caelestia-themed renderer with a transparent terminal
+    background and truecolour rain gradients from the active palette. Use
+    `cmatrix --stock` to run `/usr/bin/cmatrix` instead.
 
-Before either command starts, the wrapper reads
-`~/.local/state/caelestia/scheme.json` and temporarily remaps ANSI green to the
-current Caelestia `primary` colour. When the command exits, it prints
-`~/.local/state/caelestia/sequences.txt` to restore the generated terminal
-palette.
+The `tty-clock` wrapper reads `~/.local/state/caelestia/scheme.json` and
+temporarily remaps ANSI green to the current Caelestia `primary` colour. When
+the command exits, it prints `~/.local/state/caelestia/sequences.txt` to restore
+the generated terminal palette. The `cmatrix` renderer reads the same scheme
+file directly and only emits foreground colour sequences, preserving the
+terminal's transparent background.

@@ -1,3 +1,3 @@
-function cmatrix --wraps cmatrix --description 'Run cmatrix with the Caelestia accent colour'
-    __caelestia_run_with_accent_slot 2 cmatrix -C green $argv
+function cmatrix --wraps cmatrix --description 'Run Caelestia-themed cmatrix with transparent background and rice gradients'
+    python3 ~/.config/fish/scripts/caelestia-cmatrix.py $argv
 end

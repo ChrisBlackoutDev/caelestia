@@ -207,9 +207,8 @@ The fish config includes command wrappers for `tty-clock`, `cmatrix`,
     it runs and restores `~/.local/state/caelestia/sequences.txt` on exit. This
     counteracts the upstream script's `tput reset` cleanup, which can otherwise
     leave foot's terminal colours/transparency looking wrong.
--   `cava` runs with a temporary config generated from the live Caelestia core
-    Material palette, using the normal `~/.config/cava/config` as the base
-    settings.
+-   `cava` runs with a temporary config generated from the live Caelestia
+    palette, using the normal `~/.config/cava/config` as the base settings.
 
 The `tty-clock` wrapper reads `~/.local/state/caelestia/scheme.json` and
 temporarily remaps ANSI green to the current Caelestia `primary` colour. When

@@ -229,7 +229,7 @@ dest = "$XDG_CONFIG_HOME/codium-flags.conf"
 
 [[components]]
 name = "vscode"
-packages = ["code"]
+packages = ["visual-studio-code-bin"]
 post_install = [
     "code --install-extension $CAELESTIA_DOTS/vscode/caelestia-vscode-integration/caelestia-vscode-integration-*.vsix",
 ]

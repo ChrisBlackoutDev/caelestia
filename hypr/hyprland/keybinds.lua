@@ -8,6 +8,7 @@ local mouse            = { mouse = true }
 local release          = { release = true }
 local repeating        = { repeating = true }
 local locked_repeating = { locked = true, repeating = true }
+local non_consuming    = { non_consuming = true, transparent = true }
 
 local function normalise_keybind(key)
     return key:gsub("%s+", ""):lower()
@@ -50,6 +51,17 @@ create_bind(
         return normalise_keybind(key) == launcher_default and release or nil
     end
 )
+create_bind({
+    "SUPER + catchall",
+    "SUPER + mouse:272",
+    "SUPER + mouse:273",
+    "SUPER + mouse:274",
+    "SUPER + mouse:275",
+    "SUPER + mouse:276",
+    "SUPER + mouse:277",
+    "SUPER + mouse_up",
+    "SUPER + mouse_down",
+}, hl.dsp.global("caelestia:launcherInterrupt"), non_consuming)
 
 -- Misc
 create_bind(vars.kbSession, hl.dsp.global("caelestia:session"))
@@ -118,6 +130,7 @@ create_bind(vars.kbWindowIncreaseHeight, fn.resize_active_window(0, 10), repeati
 
 create_bind({ vars.kbMoveWindow, "SUPER + mouse:272" }, hl.dsp.window.drag(), mouse)
 create_bind({ vars.kbResizeWindow, "SUPER + mouse:273" }, hl.dsp.window.resize(), mouse)
+create_bind("mouse:272", hl.dsp.exec_cmd(vars.hyprScripts .. "/raise-windowed-click.fish"), { release = true, non_consuming = true })
 create_bind(vars.kbCenterWindow, hl.dsp.window.center())
 create_bind(vars.kbNormalizeWindow, function()
     hl.dispatch(hl.dsp.window.resize(fn.resize_by_screen(55, 70)))
@@ -138,7 +151,7 @@ end)
 create_bind(vars.kbPinWindow, hl.dsp.window.pin())
 create_bind(vars.kbWindowFullscreen, hl.dsp.window.fullscreen({ mode = "fullscreen" }))
 create_bind(vars.kbWindowBorderedFullscreen, hl.dsp.window.fullscreen({ mode = "maximized" }))
-create_bind(vars.kbToggleWindowFloating, hl.dsp.window.float())
+create_bind(vars.kbToggleWindowFloating, hl.dsp.exec_cmd(vars.hyprScripts .. "/toggle-workspace-floating.fish"))
 create_bind(vars.kbCloseWindow, hl.dsp.window.close())
 
 -- Special workspace toggles
@@ -152,7 +165,10 @@ create_bind(vars.kbTodoWs, fn.toggle("todo"))
 create_bind(vars.kbTerminal, hl.dsp.exec_cmd(vars.terminal))
 create_bind(vars.kbBrowser, hl.dsp.exec_cmd(vars.browser))
 create_bind(vars.kbEditor, hl.dsp.exec_cmd(vars.editor))
+create_bind("SUPER + G", hl.dsp.exec_cmd("github-desktop"))
 create_bind(vars.kbFileExplorer, hl.dsp.exec_cmd(vars.fileExplorer))
+create_bind("SUPER + ALT + E", hl.dsp.exec_cmd("nemo"))
+create_bind("CTRL + ALT + Escape", hl.dsp.exec_cmd("qps"))
 create_bind(vars.kbAudioSettings, hl.dsp.exec_cmd(vars.audioSettings))
 
 -- Utilities

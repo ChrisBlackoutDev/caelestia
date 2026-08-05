@@ -1,0 +1,34 @@
+# Maintainer: ChrisBlackoutDev
+
+pkgname=caelestia-shell-fork
+pkgver=2.2.0.r31.gf62d63af
+pkgrel=1
+pkgdesc='Caelestia desktop shell with ChrisBlackoutDev customizations'
+arch=('x86_64')
+url='https://github.com/ChrisBlackoutDev/shell-fork'
+license=('GPL-3.0-only')
+depends=('caelestia-cli' 'quickshell-git' 'ddcutil' 'brightnessctl' 'app2unit'
+         'libcava' 'networkmanager' 'lm_sensors' 'fish' 'aubio' 'libpipewire'
+         'glibc' 'gcc-libs' 'ttf-material-symbols-variable' 'power-profiles-daemon'
+         'ttf-rubik-vf' 'ttf-cascadia-code-nerd' 'swappy' 'libqalculate' 'bash'
+         'qt6-base' 'qt6-declarative' 'qt6-imageformats')
+makedepends=('cmake' 'ninja' 'qt6-shadertools' 'git')
+provides=('caelestia-shell=2.2.0')
+conflicts=('caelestia-shell' 'caelestia-shell-git')
+source=("${pkgname}::git+https://github.com/ChrisBlackoutDev/shell-fork.git#commit=f62d63af0f61f8fca33f5e460cb97140ac4f8cf2")
+sha256sums=('SKIP')
+
+build() {
+    cmake -S "$pkgname" -B build -G Ninja \
+        -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+        -DCMAKE_INSTALL_PREFIX=/ \
+        -DVERSION=2.2.0 \
+        -DGIT_REVISION=f62d63af0f61f8fca33f5e460cb97140ac4f8cf2 \
+        -DDISTRIBUTOR='ChrisBlackoutDev/shell-fork'
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -Dm644 "$pkgname/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

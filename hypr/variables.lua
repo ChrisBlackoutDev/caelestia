@@ -11,6 +11,7 @@ return {
     editor                     = "codium",
     fileExplorer               = "thunar",
     audioSettings              = "pavucontrol",
+    hyprScripts                = (os.getenv("XDG_CONFIG_HOME") or (os.getenv("HOME") .. "/.config")) .. "/hypr/scripts",
 
     -- Touchpad
     touchpadDisableTyping      = true,
@@ -22,17 +23,17 @@ return {
     -- Blur
     blurEnabled                = true,
     blurSpecialWs              = false,
-    blurPopups                 = true,
-    blurInputMethods           = true,
-    blurSize                   = 8,
-    blurPasses                 = 2,
+    blurPopups                 = false,
+    blurInputMethods           = false,
+    blurSize                   = 4,
+    blurPasses                 = 1,
     blurXray                   = false,
 
     -- Shadow
     shadowEnabled              = true,
-    shadowRange                = 15,
-    shadowRenderPower          = 4,
-    shadowColour               = "rgba(" .. scheme.inversePrimary .. "10)",
+    shadowRange                = 8,
+    shadowRenderPower          = 2,
+    shadowColour               = "rgba(" .. scheme.surface .. "d4)",
 
     -- Gaps
     workspaceGaps              = 20,
@@ -41,7 +42,7 @@ return {
     singleWindowGapsOut        = 20,
 
     -- Window styling
-    windowOpacity              = 0.95,
+    windowOpacity              = 1.0,
     windowRounding             = 15,
     windowBorderSize           = 1,
     activeWindowBorderColour   = "rgba(" .. scheme.primary .. "e6)",

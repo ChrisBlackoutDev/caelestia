@@ -97,6 +97,7 @@ tagged_rule(float_60_70_tag, {
 }, "title")
 tagged_rule(float_60_70_tag, {
     { title = "(Save|Export) Image", class = "gimp" }, -- GIMP export/save
+    { title = "nmtui",               class = "foot" }, -- NetworkManager TUI
 })
 tagged_rule(float_60_70_tag, {
     "org.pulseaudio.pavucontrol|com.saivert.pwvucontrol", -- Audio control
@@ -146,7 +147,7 @@ tagged_rule(communication_app_tag, {
     "whatsapp"                 -- Whatsapp
 }, "class")
 tagged_rule(todo_app_tag, {
-    "todoist" -- Todoist
+    "Todoist|todoist" -- Todoist
 }, "class")
 
 
@@ -155,6 +156,7 @@ tagged_rule(todo_app_tag, {
 -----------------------
 
 -- Steam
+hl.window_rule({ match = { class = "steam" }, rounding = math.min(10, vars.windowRounding) })
 tagged_rule(float_tag, { { class = "steam", title = "Friends List" } })
 tagged_rule(xwl_popup_tag, { { class = "steam", title = "" } })
 

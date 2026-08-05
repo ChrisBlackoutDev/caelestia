@@ -280,4 +280,4 @@ src = "zen/native_app/manifest.json"
 dest = "$HOME/.zen/native-messaging-hosts/caelestiafox.json"
 [[components.entries]]
 src = "zen/caelestia-firefox-integration"
-dest = "$XDG_DATA_HOME/caelestia/zen-firefox-integration"
+dest = "$XDG_DATA_HOME/caelestia-integrations/zen-firefox-integration"

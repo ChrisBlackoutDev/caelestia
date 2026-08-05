@@ -1,35 +1,78 @@
 # Upstream Sync
 
-Shell fork refresh:
+Use this procedure when refreshing from upstream Caelestia or upstream shell. Do not assume prior chat context.
+
+## Rules
+
+- Check `git status --short --branch` in every repo before changing files.
+- Use new refresh branches from upstream `main`.
+- Do not blindly rebase or cherry-pick if upstream changed architecture.
+- Keep shell fork changes and rice fork changes separate, then coordinate them through the rice PKGBUILD pin.
+- Do not publish personal shell packages to the AUR.
+
+## Shell Fork First
 
 ```sh
-cd ~/.local/src/shell-fork-work
+cd /home/kensa/.local/src/shell-fork-work
 git status --short --branch
 git fetch upstream main
 git switch -c codex/upstream-refresh-YYYY-MM-DD upstream/main
 ```
 
-Port only local fixes that upstream still lacks, then build:
+Port only local fixes that upstream still lacks. Inspect upstream first; skip patches that are already superseded.
+
+Build before packaging:
 
 ```sh
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
 cmake --build build
 ```
 
-Update `bootstrap/pkgbuilds/caelestia-shell-fork/PKGBUILD` in the rice repo to pin the pushed shell fork commit. Mirror the same PKGBUILD into `~/.local/src/caelestia-shell-fork/PKGBUILD` if you want a standalone local package worktree. Validate with `makepkg --printsrcinfo`, then build/install the package.
+Commit and push the shell fork refresh before updating the rice package pin.
 
-Rice fork refresh:
+## Shell Package Pin
+
+Update the rice PKGBUILD:
+
+```text
+bootstrap/pkgbuilds/caelestia-shell-fork/PKGBUILD
+```
+
+Pin `source` and `GIT_REVISION` to the pushed shell fork commit. Keep `pkgver` and `provides` consistent with the shell version being packaged.
+
+If maintaining the standalone package worktree, mirror the same PKGBUILD to:
+
+```text
+/home/kensa/.local/src/caelestia-shell-fork/PKGBUILD
+```
+
+Validate package metadata from the PKGBUILD directory:
 
 ```sh
-cd ~/.local/share/caelestia
+makepkg --printsrcinfo
+```
+
+## Rice Fork
+
+```sh
+cd /home/kensa/.local/share/caelestia
 git status --short --branch
 git fetch upstream main
 git switch -c codex/upstream-refresh-YYYY-MM-DD upstream/main
 ```
 
-Port personal changes into the current Lua and manifest architecture. Do not bring back legacy `.conf` Hyprland files or `install.fish` as the main installer.
+Port personal changes into the current upstream architecture:
 
-Before live migration, check `~/.config/caelestia/cli.json` points at the intended fork branch:
+- `manifest.toml` for components and local packages.
+- `profiles/kensa-desktop.toml` for personal apps, services, groups, and enabled components.
+- `hypr/*.lua` and `hypr/hyprland/*.lua` for Hyprland config.
+- `hypr/utils/functions.lua` only when shared Lua helpers are needed.
+
+Do not resurrect old repo-level `install.fish`, repo-level `PKGBUILD`, `.SRCINFO`, or legacy Hyprland `.conf` config as the primary architecture.
+
+## CLI Source
+
+Before live migration, verify `~/.config/caelestia/cli.json` points at the intended fork branch:
 
 ```json
 {
@@ -40,11 +83,22 @@ Before live migration, check `~/.config/caelestia/cli.json` points at the intend
 }
 ```
 
-Then run the bootstrap from the refreshed rice fork rather than invoking `caelestia install` directly:
+`caelestia-cli` clones managed dots under `~/.local/state/caelestia/dots`.
+
+## Validation And Migration
+
+Run static validation first. Then use the bootstrap dry-run:
 
 ```sh
 fish bootstrap/install.fish --profile kensa-desktop --dry-run --noconfirm
+```
+
+For live migration, use the bootstrap rather than direct `caelestia install`:
+
+```sh
 fish bootstrap/install.fish --profile kensa-desktop --noconfirm
 ```
 
-The live bootstrap performs a full `pacman -Syu` before selected package installs, checks split-package consistency, requires `hyprlock`, and only then runs `caelestia install`. Avoid going AFK during this step; shell, lock, and compositor-adjacent packages may be restarted while the desktop is still running.
+The bootstrap performs a full `pacman -Syu`, checks split-package consistency, requires `hyprlock`, and only then runs `caelestia install`.
+
+Avoid going AFK during live migration. The shell, session lock, and compositor-adjacent packages may restart while the desktop is still running.

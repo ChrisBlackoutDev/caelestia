@@ -1,6 +1,27 @@
 # Validation
 
-Run static validation before installing live dots:
+Use the smallest validation set that matches the change. Do not run live installs, package installs, service changes, or VM tests during docs-only work.
+
+## Docs-Only Changes
+
+```sh
+git diff --check
+rg -n "TODO|FIXME|install\\.fish|PKGBUILD|\\.SRCINFO|hypr-user\\.conf|hypr-vars\\.conf|AUR" AGENTS.md README.md docs
+```
+
+Read the grep results as a stale-reference check, not as an automatic failure. Some references are intentional when documenting what not to do.
+
+Do not run these for docs-only work:
+
+```sh
+caelestia install
+caelestia update
+sudo pacman -Syu
+sudo pacman -S ...
+systemctl enable --now ...
+```
+
+## Config Or Bootstrap Changes
 
 ```sh
 python - <<'PY'
@@ -15,24 +36,33 @@ find applications -name '*.desktop' -print0 | xargs -0 -r desktop-file-validate
 fish bootstrap/install.fish --profile kensa-desktop --dry-run --noconfirm
 ```
 
-Before live migration on a real Arch system, verify package consistency:
+Before live migration on a real Arch system:
 
 ```sh
 pacman -Q networkmanager libnm
 pacman -Q hyprlock
 ```
 
-`networkmanager` and `libnm` must report the same version. If they do not, run `sudo pacman -Syu` before touching the live Caelestia install.
+`networkmanager` and `libnm` must report the same version. If they do not, run a full system upgrade before touching the live Caelestia install.
 
-For shell changes, build the shell fork first, then validate package metadata:
+## Shell Fork Changes
+
+From `/home/kensa/.local/src/shell-fork-work`:
 
 ```sh
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
 cmake --build build
+```
+
+After updating the rice PKGBUILD pin, validate package metadata from the PKGBUILD directory:
+
+```sh
 makepkg --printsrcinfo
 ```
 
-Manual smoke tests after live install:
+## Manual Runtime Smoke Checks
+
+These are reference checks after a live install. Do not execute them during docs-only work.
 
 - Shell starts and can restart.
 - Launcher opens and modifier-only launcher behavior does not self-trigger during mouse/window shortcuts.

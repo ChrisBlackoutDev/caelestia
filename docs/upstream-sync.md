@@ -16,7 +16,7 @@ cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
 cmake --build build
 ```
 
-Update `~/.local/src/caelestia-shell-fork/PKGBUILD` to pin the pushed shell fork commit. Validate with `makepkg --printsrcinfo`, then build/install the package.
+Update `bootstrap/pkgbuilds/caelestia-shell-fork/PKGBUILD` in the rice repo to pin the pushed shell fork commit. Mirror the same PKGBUILD into `~/.local/src/caelestia-shell-fork/PKGBUILD` if you want a standalone local package worktree. Validate with `makepkg --printsrcinfo`, then build/install the package.
 
 Rice fork refresh:
 

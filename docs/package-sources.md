@@ -4,7 +4,7 @@
 
 Use `packages.official.*` for Arch repo packages installed with pacman. Use `packages.aur.*` for AUR packages installed with the configured helper. Keep packages grouped by purpose so future agents can add or remove apps without guessing why they exist.
 
-Bundled PKGBUILDs belong in `manifest.toml` with the `local:` prefix, for example `local:bootstrap/pkgbuilds/caelestia-shell-fork`.
+Bundled PKGBUILDs belong in `manifest.toml` with the `local:` prefix, for example `local:bootstrap/pkgbuilds/caelestia-shell-fork`. The personal shell fork package does not need an AUR package; `caelestia install` builds the bundled PKGBUILD from the managed dots clone.
 
 Services are listed under `[services]`. User group membership is listed under `[groups]`. Risky or credential-bound setup belongs under `[manual]`, not in the bootstrap.
 

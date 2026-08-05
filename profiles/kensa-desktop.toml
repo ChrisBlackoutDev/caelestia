@@ -138,7 +138,7 @@ packages = [
 ]
 
 [packages.aur.shell]
-purpose = "Caelestia shell fork and AUR helpers"
+purpose = "Caelestia CLI, runtime dependencies, fonts, and AUR helpers"
 packages = [
     "caelestia-cli",
     "quickshell-git",

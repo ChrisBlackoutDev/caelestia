@@ -52,7 +52,6 @@ create_bind(
     end
 )
 create_bind({
-    "SUPER + catchall",
     "SUPER + mouse:272",
     "SUPER + mouse:273",
     "SUPER + mouse:274",

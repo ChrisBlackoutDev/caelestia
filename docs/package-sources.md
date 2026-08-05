@@ -10,6 +10,10 @@ Services are listed under `[services]`. User group membership is listed under `[
 
 Caelestia components are listed under `[caelestia].enable_components`; those names must match `manifest.toml`.
 
+Keep split-package runtime pairs explicit when a profile includes one side. For this desktop, `networkmanager` and `libnm` are both listed so selected-package installs do not advance NetworkManager while leaving its library package behind. The bootstrap also validates this pair before live migration.
+
+`hyprlock` is part of the desktop package set and the `hypr` component. Even when Caelestia/Quickshell provides the primary lock UI, `hyprlock` must be installed before live shell/session-lock migration so Hyprland has a known lockscreen fallback available.
+
 When changing package metadata, validate:
 
 ```sh

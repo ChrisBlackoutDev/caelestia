@@ -15,6 +15,15 @@ find applications -name '*.desktop' -print0 | xargs -0 -r desktop-file-validate
 fish bootstrap/install.fish --profile kensa-desktop --dry-run --noconfirm
 ```
 
+Before live migration on a real Arch system, verify package consistency:
+
+```sh
+pacman -Q networkmanager libnm
+pacman -Q hyprlock
+```
+
+`networkmanager` and `libnm` must report the same version. If they do not, run `sudo pacman -Syu` before touching the live Caelestia install.
+
 For shell changes, build the shell fork first, then validate package metadata:
 
 ```sh
@@ -30,6 +39,7 @@ Manual smoke tests after live install:
 - Special workspaces open, move configured apps, and hide correctly.
 - `Super+Alt+Space` toggles the current workspace between tiled and floating behavior.
 - Lock, idle lock, DPMS off, and suspend-then-hibernate timings behave as expected.
+- Locking still works after the shell is restarted, and Hyprland does not show the session-lock rescue screen.
 - Screenshots, screen recording, clipboard history, and emoji picker work.
 - Terminal toys launch: `tty-clock`, `cmatrix`, `pipes.sh`, and `cava`.
 - Browser, editor, file manager, thumbnails, audio, Bluetooth, printing, VPN, Docker, and desktop entries all work.

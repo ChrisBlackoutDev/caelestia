@@ -9,6 +9,8 @@ Guidelines for future Codex agents:
 - Preserve the current Caelestia architecture: use `manifest.toml` for components and dependencies; do not resurrect `install.fish` as the primary installer.
 - Use `profiles/kensa-desktop.toml` as the source of truth for desktop applications, services, groups, and Caelestia install components.
 - Keep the shell fork and rice fork coordinated. The rice manifest should use `caelestia-shell-fork` when the shell fork is the intended shell package.
+- Never run live `caelestia install` or selected pacman package installs as a substitute for a full Arch upgrade. The bootstrap must run `pacman -Syu` first and validate split packages such as `networkmanager/libnm`.
+- Keep `hyprlock` installed as part of the desktop profile before shell/session-lock migration.
 - Do not hand-edit generated metadata such as `package-lock.json`; regenerate it with the owning tool.
 - Do not hardcode `/home/kensa` unless the target format requires an absolute path, such as browser native-messaging manifests. Document any unavoidable hardcoded path.
 - Test TOML, JSON, Lua, fish, and desktop files before finishing.

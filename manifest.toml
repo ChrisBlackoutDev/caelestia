@@ -12,6 +12,7 @@ name = "hypr"
 default = true
 packages = [
     "hyprland",
+    "hyprlock",
     "xdg-desktop-portal-hyprland",
     "xdg-desktop-portal-gtk",
     "ttf-jetbrains-mono-nerd",
@@ -150,7 +151,7 @@ packages = ["gnome-keyring", "polkit-gnome"]
 [[components]]
 name = "network"
 default = true
-packages = ["networkmanager"]
+packages = ["networkmanager", "libnm"]
 
 [[components]]
 name = "bluetooth"

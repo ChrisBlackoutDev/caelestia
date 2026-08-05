@@ -39,3 +39,12 @@ Before live migration, check `~/.config/caelestia/cli.json` points at the intend
     }
 }
 ```
+
+Then run the bootstrap from the refreshed rice fork rather than invoking `caelestia install` directly:
+
+```sh
+fish bootstrap/install.fish --profile kensa-desktop --dry-run --noconfirm
+fish bootstrap/install.fish --profile kensa-desktop --noconfirm
+```
+
+The live bootstrap performs a full `pacman -Syu` before selected package installs, checks split-package consistency, requires `hyprlock`, and only then runs `caelestia install`. Avoid going AFK during this step; shell, lock, and compositor-adjacent packages may be restarted while the desktop is still running.

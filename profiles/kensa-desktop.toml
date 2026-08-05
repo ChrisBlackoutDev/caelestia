@@ -67,6 +67,7 @@ packages = [
     "qps",
     "nemo",
     "gammastep",
+    "hyprlock",
     "pipewire",
     "pipewire-alsa",
     "pipewire-jack",
@@ -75,6 +76,7 @@ packages = [
     "wpa_supplicant",
     "openssh",
     "networkmanager",
+    "libnm",
     "sddm",
     "power-profiles-daemon",
 ]

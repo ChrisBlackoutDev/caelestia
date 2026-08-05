@@ -59,6 +59,30 @@ function sudo_run
     end
 end
 
+function sudo_run_inhibited
+    if test "$bootstrap_dry_run" -eq 1
+        printf '[dry-run] sudo systemd-inhibit --what=idle:sleep:shutdown --why %s %s\n' \
+            (string escape -- "Caelestia bootstrap live migration") \
+            (string join -- ' ' (string escape -- $argv))
+    else if command -q systemd-inhibit
+        sudo systemd-inhibit --what=idle:sleep:shutdown --why "Caelestia bootstrap live migration" $argv
+    else
+        sudo $argv
+    end
+end
+
+function run_inhibited
+    if test "$bootstrap_dry_run" -eq 1
+        printf '[dry-run] systemd-inhibit --what=idle:sleep:shutdown --why %s %s\n' \
+            (string escape -- "Caelestia bootstrap live migration") \
+            (string join -- ' ' (string escape -- $argv))
+    else if command -q systemd-inhibit
+        systemd-inhibit --what=idle:sleep:shutdown --why "Caelestia bootstrap live migration" $argv
+    else
+        command $argv
+    end
+end
+
 function filter_helper_packages
     set -l helper $argv[1]
     for package in $argv[2..-1]
@@ -66,6 +90,65 @@ function filter_helper_packages
             printf '%s\n' "$package"
         end
     end
+end
+
+function package_version --argument-names package
+    pacman -Q "$package" 2>/dev/null | string split ' ' -f 2
+end
+
+function validate_same_installed_version --argument-names label
+    set -l packages $argv[2..-1]
+    set -l reference_version
+    set -l installed
+
+    for package in $packages
+        set -l package_version_value (package_version "$package")
+        if test -z "$package_version_value"
+            continue
+        end
+
+        set -a installed "$package=$package_version_value"
+        if test -z "$reference_version"
+            set reference_version "$package_version_value"
+        else if test "$package_version_value" != "$reference_version"
+            echo "error: $label version mismatch detected:" >&2
+            for entry in $installed
+                echo "  $entry" >&2
+            end
+            echo "Run 'sudo pacman -Syu' and rerun the bootstrap before live Caelestia migration." >&2
+            return 1
+        end
+    end
+end
+
+function validate_split_packages
+    if pacman -Q networkmanager >/dev/null 2>&1
+        if not pacman -Q libnm >/dev/null 2>&1
+            echo "error: networkmanager is installed but libnm is missing." >&2
+            echo "Run 'sudo pacman -Syu' and rerun the bootstrap before live Caelestia migration." >&2
+            return 1
+        end
+    end
+
+    validate_same_installed_version "NetworkManager/libnm" networkmanager libnm; or return 1
+    validate_same_installed_version "GCC runtime" gcc gcc-libs libgcc libstdc++ lib32-gcc-libs; or return 1
+end
+
+function require_installed --argument-names package reason
+    if test "$bootstrap_dry_run" -eq 1
+        log "would require installed package: $package ($reason)"
+        return 0
+    end
+
+    if not pacman -Q "$package" >/dev/null 2>&1
+        echo "error: required package '$package' is not installed: $reason" >&2
+        return 1
+    end
+end
+
+function validate_live_migration_ready
+    validate_split_packages; or return 1
+    require_installed hyprlock "Hyprland lock fallback must exist before a live shell/session-lock migration."; or return 1
 end
 
 set -l aur_helper (profile_scalar "$profile_file" caelestia aur_helper paru)
@@ -79,10 +162,20 @@ set -l groups (profile_array "$profile_file" groups add)
 set -l components (profile_array "$profile_file" caelestia enable_components)
 
 log "profile: $profile_file"
+
+log "running full Arch system upgrade preflight"
+set -l system_upgrade_args pacman -Syu
+if test $noconfirm -eq 1
+    set -a system_upgrade_args --noconfirm
+end
+sudo_run_inhibited $system_upgrade_args
+validate_split_packages; or exit 1
+
 log "installing official packages"
 if test (count $official_packages) -gt 0
     sudo_run pacman -S --needed --noconfirm $official_packages
 end
+validate_live_migration_ready; or exit 1
 
 if not command -q $aur_helper
     log "installing AUR helper: $aur_helper"
@@ -108,6 +201,7 @@ if test (count $aur_to_install) -gt 0
     log "installing AUR packages with $aur_helper"
     run $aur_helper -S --needed --noconfirm $aur_to_install
 end
+validate_live_migration_ready; or exit 1
 
 log "writing caelestia CLI dots source"
 if test $dry_run -eq 1
@@ -137,15 +231,21 @@ path.write_text(json.dumps(data, indent=4, sort_keys=True) + "\n", encoding="utf
 end
 
 if command -q caelestia
+    validate_live_migration_ready; or exit 1
     log "installing Caelestia components"
+    if test -n "$HYPRLAND_INSTANCE_SIGNATURE"
+        log "Hyprland is running; keep this session unlocked until the Caelestia install finishes."
+        log "systemd idle/sleep/shutdown inhibition is active where supported, but compositor idle lockers may still trigger."
+    end
     set -l install_args install --aur-helper $aur_helper --enable-components (string join , $components)
     if test $noconfirm -eq 1
         set -a install_args --noconfirm
     end
-    run caelestia $install_args
+    run_inhibited caelestia $install_args
 else
     log "caelestia-cli not found yet; skipping caelestia install"
 end
+validate_live_migration_ready; or exit 1
 
 if test (count $services) -gt 0
     log "enabling services"

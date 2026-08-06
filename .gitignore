@@ -19,6 +19,8 @@
 /bootstrap/pkgbuilds/*/pkg/
 /bootstrap/pkgbuilds/*/src/
 /bootstrap/pkgbuilds/*/*.pkg.tar*
+/bootstrap/pkgbuilds/*/*/
 /packages/*/pkg/
 /packages/*/src/
 /packages/*/*.pkg.tar*
+/packages/*/*/

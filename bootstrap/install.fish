@@ -90,6 +90,13 @@ function run_inhibited
             (string join -- ' ' (string escape -- $argv))
     else if command -q systemd-inhibit
         systemd-inhibit --what=idle:sleep:shutdown --why "Caelestia bootstrap live migration" $argv
+        set -l inhibit_status $status
+        if test $inhibit_status -eq 0
+            return 0
+        end
+
+        log "systemd-inhibit failed with status $inhibit_status; continuing without an idle/sleep inhibitor"
+        command $argv
     else
         command $argv
     end

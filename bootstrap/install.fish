@@ -189,6 +189,7 @@ set -l dots_url (profile_scalar "$profile_file" caelestia dots_url "https://gith
 set -l dots_branch (profile_scalar "$profile_file" caelestia dots_branch "codex/upstream-refresh-2026-08-05")
 set -l official_packages (profile_packages "$profile_file" official)
 set -l aur_packages (profile_packages "$profile_file" aur)
+set -l cleanup_packages (profile_array "$profile_file" packages.cleanup remove_if_installed)
 set -l services (profile_array "$profile_file" services enable)
 set -l groups (profile_array "$profile_file" groups add)
 set -l components (profile_array "$profile_file" caelestia enable_components)
@@ -202,6 +203,20 @@ if test $noconfirm -eq 1
 end
 sudo_run_inhibited $system_upgrade_args; or exit 1
 validate_split_packages; or exit 1
+
+if test (count $cleanup_packages) -gt 0
+    set -l installed_cleanup
+    for package in $cleanup_packages
+        if pacman -Q "$package" >/dev/null 2>&1
+            set -a installed_cleanup "$package"
+        end
+    end
+
+    if test (count $installed_cleanup) -gt 0
+        log "removing profile cleanup packages: "(string join ', ' $installed_cleanup)
+        sudo_run pacman -Rns --noconfirm $installed_cleanup; or exit 1
+    end
+end
 
 log "installing official packages"
 if test (count $official_packages) -gt 0

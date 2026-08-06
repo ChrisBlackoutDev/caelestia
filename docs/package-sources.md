@@ -40,6 +40,8 @@ Keep split-package runtime pairs explicit when a profile includes one side. For 
 
 Keep provider choices explicit when unattended pacman installs would otherwise pick the first provider. `tesseract-data-eng` is listed so OCR dependencies get English data instead of an arbitrary language package, and `tinyxxd` is listed so packages needing `xxd` do not pull in the larger `gvim` package by default.
 
+Known accidental provider packages belong in `[packages.cleanup] remove_if_installed`, not in ad hoc install notes. The bootstrap removes those after the full system upgrade and before installing preferred packages, so reruns can converge from an earlier partial/default-provider state.
+
 Some AUR packages used here are source builds, not binary downloads. `quickshell-git` and AppImage integration dependencies can compile for a long time on older desktops; treat steady compiler output as progress, not a hang. If source build time becomes too painful, prefer swapping the package source in the profile to a trustworthy binary package rather than adding one-off install commands to the bootstrap.
 
 ## Hardcoded Paths

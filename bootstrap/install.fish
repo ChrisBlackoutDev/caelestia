@@ -114,7 +114,7 @@ function aur_helper_build_deps --argument-names helper
 end
 
 function built_package_files --argument-names dir
-    find "$dir" -maxdepth 1 -type f -name '*.pkg.tar.zst' -print
+    find "$dir" -maxdepth 1 -type f -name '*.pkg.tar.zst' ! -name '*-debug-*.pkg.tar.zst' -print
 end
 
 function package_version --argument-names package
@@ -239,7 +239,14 @@ end
 set -l aur_to_install (filter_helper_packages $aur_helper $aur_packages)
 if test (count $aur_to_install) -gt 0
     log "installing AUR packages with $aur_helper"
-    run $aur_helper -S --needed --noconfirm $aur_to_install; or exit 1
+    set -l aur_install_args -S --needed --noconfirm
+    if test "$aur_helper" = paru
+        set -a aur_install_args --skipreview --noinstalldebug
+        if set -q SUDO_ASKPASS
+            set -a aur_install_args --sudoflags=-A
+        end
+    end
+    run $aur_helper $aur_install_args $aur_to_install; or exit 1
 end
 validate_live_migration_ready; or exit 1
 

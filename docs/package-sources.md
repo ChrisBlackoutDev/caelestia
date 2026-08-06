@@ -22,6 +22,8 @@ packages = ["caelestia-cli", "local:bootstrap/pkgbuilds/caelestia-shell-fork"]
 
 Do not publish `caelestia-shell-fork` to the AUR for this workflow. The local PKGBUILD pins a commit from `https://github.com/ChrisBlackoutDev/shell-fork`, and `caelestia install` builds it from the managed dots clone.
 
+Spotify has intentionally been removed from this setup. See `docs/music-platform.md` before adding music app packages or theming hooks.
+
 ## Adding Or Removing An App
 
 1. Decide whether the package is official repo, AUR, or local.

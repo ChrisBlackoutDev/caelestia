@@ -30,7 +30,6 @@ enable_components = [
     "clipboard",
     "fonts",
     "tools",
-    "spotify",
     "vscode",
     "todoist",
     "uwsm",
@@ -135,7 +134,6 @@ packages = [
     "orca-slicer-bin",
     "betaflight-configurator-bin",
     "todoist-appimage",
-    "spotify",
     "github-desktop-bin",
 ]
 
@@ -150,10 +148,6 @@ packages = [
     "paru",
     "yay",
 ]
-
-[packages.aur.spotify]
-purpose = "Spotify theming"
-packages = ["spicetify-cli", "spicetify-marketplace-bin"]
 
 [services]
 enable = ["NetworkManager", "bluetooth", "cups", "docker", "tailscaled", "mullvad-daemon"]

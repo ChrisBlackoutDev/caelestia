@@ -9,7 +9,7 @@ This repo is not an AUR publishing workflow. Personal packages, including the sh
 After `archinstall`, SSH into the new machine as the target user:
 
 ```sh
-sudo pacman -S --needed git fish
+sudo pacman -Syu --needed git fish
 git clone https://github.com/ChrisBlackoutDev/caelestia.git ~/.local/share/caelestia
 cd ~/.local/share/caelestia
 fish bootstrap/install.fish --profile kensa-desktop --dry-run --noconfirm
@@ -31,6 +31,7 @@ The bootstrap reads `profiles/kensa-desktop.toml`, performs a full `pacman -Syu`
 
 - Fresh install flow: `docs/fresh-arch-install.md`
 - Package ownership and app changes: `docs/package-sources.md`
+- Music platform notes: `docs/music-platform.md`
 - Upstream refresh procedure: `docs/upstream-sync.md`
 - Validation and smoke-test checklist: `docs/validation.md`
 - Future-agent rules: `AGENTS.md`

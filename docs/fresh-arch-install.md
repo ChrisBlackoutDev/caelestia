@@ -9,7 +9,7 @@ This flow is for ChrisBlackoutDev's personal desktop after a normal `archinstall
 3. Install only the tools needed to clone and run the bootstrap:
 
    ```sh
-   sudo pacman -S --needed git fish
+   sudo pacman -Syu --needed git fish
    ```
 
 4. Clone this fork:
@@ -58,7 +58,7 @@ The full upgrade preflight is intentional. Arch does not support partial upgrade
 These remain manual because they need credentials, hardware, or local judgment:
 
 - Log into Tailscale and Mullvad.
-- Log into browsers, Spotify, Todoist, Zoom, GitHub Desktop, and other account-backed apps.
+- Log into browsers, Todoist, Zoom, GitHub Desktop, and other account-backed apps.
 - Pair Bluetooth devices.
 - Add printers and test printing.
 - Confirm Docker group membership after logging out and back in.

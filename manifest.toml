@@ -202,17 +202,6 @@ post_install = ["xdg-user-dirs-update"]
 # --- Optional components ---
 
 [[components]]
-name = "spotify"
-packages = ["spotify", "spicetify-cli", "spicetify-marketplace-bin"]
-post_install = [
-    "spicetify config current_theme caelestia color_scheme caelestia custom_apps marketplace",
-    "spicetify apply",
-]
-[[components.entries]]
-src = "spicetify"
-dest = "$XDG_CONFIG_HOME/spicetify"
-
-[[components]]
 name = "vscodium"
 packages = ["vscodium-bin", "vscodium-bin-marketplace"]
 post_install = [

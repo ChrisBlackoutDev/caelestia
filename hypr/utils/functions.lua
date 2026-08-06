@@ -101,12 +101,6 @@ local function default_config()
             whatsapp = { enable = true, match = { { class = "whatsapp" } }, move = true },
         },
         music = {
-            spotify = {
-                enable  = true,
-                match   = { { class = "Spotify" }, { initial_title = "Spotify" }, { initial_title = "Spotify Free" } },
-                command = { "spicetify", "watch", "-s" },
-                move    = true,
-            },
             feishin = { enable = true, match = { { class = "feishin" } }, move = true },
         },
         sysmon = {

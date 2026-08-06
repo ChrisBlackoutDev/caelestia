@@ -13,6 +13,7 @@ This is ChrisBlackoutDev's personal Arch Linux, Hyprland, and Caelestia desktop 
 ## Source Of Truth
 
 - Personal desktop apps, services, groups, and enabled Caelestia components: `profiles/kensa-desktop.toml`.
+- Display manager source of truth: `[display_manager.sddm]` in `profiles/kensa-desktop.toml`; the bootstrap writes `/etc/sddm.conf.d` from it.
 - Caelestia components, component entries, and local package references: `manifest.toml`.
 - Bootstrap entrypoint: `bootstrap/install.fish`.
 - Profile parsing helpers: `bootstrap/lib/profile.fish`.
@@ -25,6 +26,7 @@ This is ChrisBlackoutDev's personal Arch Linux, Hyprland, and Caelestia desktop 
 ## What To Edit
 
 - Add or remove normal desktop apps in `profiles/kensa-desktop.toml`.
+- Keep SDDM/Astronaut theme package, service, and greeter config profile-driven; do not edit `/usr/share/sddm/themes` by hand.
 - Add or remove Caelestia-managed config components in `manifest.toml`.
 - Update the local shell package pin in `bootstrap/pkgbuilds/caelestia-shell-fork/PKGBUILD` after the shell fork commit changes.
 - Mirror that PKGBUILD into `/home/kensa/.local/src/caelestia-shell-fork/PKGBUILD` only when maintaining the standalone package worktree.
@@ -45,6 +47,7 @@ This is ChrisBlackoutDev's personal Arch Linux, Hyprland, and Caelestia desktop 
 - Never run live selected-package installs as a substitute for a full Arch upgrade. The bootstrap must run `pacman -Syu` first.
 - Validate split packages such as `networkmanager/libnm` before live migration.
 - Keep `hyprlock` installed as part of the desktop profile before shell/session-lock migration.
+- Keep `sddm`, the Astronaut theme package, and the configured SDDM theme in place before expecting graphical login after reboot.
 - Stay present and keep the desktop unlocked during live shell/compositor-adjacent migrations.
 
 ## Validation

@@ -24,6 +24,17 @@ Do not publish `caelestia-shell-fork` to the AUR for this workflow. The local PK
 
 Spotify has intentionally been removed from this setup. See `docs/music-platform.md` before adding music app packages or theming hooks.
 
+## Display Manager Packages
+
+The personal display manager setup is SDDM with Keyitdev's Astronaut theme family. Keep this split across the profile sections:
+
+- Official packages: `sddm`, `qt6-5compat`, `qt6-declarative`, `qt6-multimedia-ffmpeg`, `qt6-svg`, and `qt6-virtualkeyboard`.
+- AUR package: `sddm-astronaut-theme`.
+- Service: `sddm` under `[services].enable`.
+- Config: `[display_manager.sddm]` with `theme = "pixel-sakura"` and `input_method = "qtvirtualkeyboard"`.
+
+The bootstrap writes `/etc/sddm.conf.d/theme.conf` and `/etc/sddm.conf.d/virtualkbd.conf` from the profile. Do not hand-edit `/usr/share/sddm/themes`; package or document theme changes instead.
+
 ## Adding Or Removing An App
 
 1. Decide whether the package is official repo, AUR, or local.

@@ -40,12 +40,33 @@ This flow is for ChrisBlackoutDev's personal desktop after a normal `archinstall
 - Installs official repo packages first.
 - Installs or reuses the configured AUR helper.
 - Installs AUR packages second.
+- Configures SDDM as the display manager, using the Astronaut theme package and the profile-selected `pixel-sakura` theme.
 - Writes `~/.config/caelestia/cli.json` so `caelestia-cli` points at this fork and branch.
 - Runs `caelestia install` with the profile's enabled components.
 - Enables configured services.
 - Adds the target user to configured groups.
 
 The full upgrade preflight is intentional. Arch does not support partial upgrades; installing a named package such as `networkmanager` without upgrading the matching `libnm` package can break networking after restart.
+
+## Display Manager
+
+This profile replicates the current workstation login manager with SDDM and Keyitdev's Astronaut theme family. The official package list includes `sddm` plus the Qt6 runtime pieces the greeter needs, and the AUR list includes `sddm-astronaut-theme`.
+
+The selected personal theme is `pixel-sakura`, configured by the bootstrap in `/etc/sddm.conf.d/theme.conf`:
+
+```ini
+[Theme]
+Current=pixel-sakura
+```
+
+The bootstrap also writes `/etc/sddm.conf.d/virtualkbd.conf` so SDDM loads Qt virtual keyboard support:
+
+```ini
+[General]
+InputMethod=qtvirtualkeyboard
+```
+
+`sddm` is included in `[services].enable`, so fresh installs should boot to the graphical SDDM login after the bootstrap finishes and the machine reboots.
 
 ## Safety Notes
 

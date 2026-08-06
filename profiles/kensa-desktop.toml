@@ -78,6 +78,11 @@ packages = [
     "networkmanager",
     "libnm",
     "sddm",
+    "qt6-5compat",
+    "qt6-declarative",
+    "qt6-multimedia-ffmpeg",
+    "qt6-svg",
+    "qt6-virtualkeyboard",
     "power-profiles-daemon",
 ]
 
@@ -144,6 +149,7 @@ purpose = "Caelestia CLI, runtime dependencies, fonts, and AUR helpers"
 packages = [
     "caelestia-cli",
     "quickshell-git",
+    "sddm-astronaut-theme",
     "ttf-material-symbols-variable",
     "ttf-rubik-vf",
     "ttf-cascadia-code-nerd",
@@ -157,7 +163,11 @@ remove_before_install = ["gvim"]
 remove_after_install = ["tesseract-data-afr"]
 
 [services]
-enable = ["NetworkManager", "bluetooth", "cups", "docker", "tailscaled", "mullvad-daemon"]
+enable = ["NetworkManager", "bluetooth", "cups", "docker", "tailscaled", "mullvad-daemon", "sddm"]
+
+[display_manager.sddm]
+theme = "pixel-sakura"
+input_method = "qtvirtualkeyboard"
 
 [groups]
 user = "kensa"

@@ -224,6 +224,56 @@ function remove_installed_packages --argument-names label
     end
 end
 
+function install_root_text_file --argument-names destination
+    set -l lines $argv[2..-1]
+
+    if test "$bootstrap_dry_run" -eq 1
+        printf '[dry-run] write %s\n' "$destination"
+        for line in $lines
+            printf '[dry-run]   %s\n' "$line"
+        end
+        return 0
+    end
+
+    set -l tmp (mktemp); or return 1
+    for line in $lines
+        printf '%s\n' "$line" >>"$tmp"; or begin
+            command rm -f "$tmp"
+            return 1
+        end
+    end
+
+    sudo_run install -m 644 "$tmp" "$destination"
+    set -l install_status $status
+    command rm -f "$tmp"
+    return $install_status
+end
+
+function configure_sddm --argument-names theme input_method
+    if test -z "$theme" -a -z "$input_method"
+        return 0
+    end
+
+    log "configuring SDDM"
+    sudo_run install -d -m 755 /etc/sddm.conf.d; or return 1
+
+    if test -n "$theme"
+        if test "$bootstrap_dry_run" -eq 0
+            if not test -d "/usr/share/sddm/themes/$theme"
+                echo "error: SDDM theme '$theme' is configured, but /usr/share/sddm/themes/$theme does not exist." >&2
+                echo "Install the configured theme package and rerun the bootstrap." >&2
+                return 1
+            end
+        end
+
+        install_root_text_file /etc/sddm.conf.d/theme.conf "[Theme]" "Current=$theme"; or return 1
+    end
+
+    if test -n "$input_method"
+        install_root_text_file /etc/sddm.conf.d/virtualkbd.conf "[General]" "InputMethod=$input_method"; or return 1
+    end
+end
+
 set -l aur_helper (profile_scalar "$profile_file" caelestia aur_helper paru)
 set -l target_user (profile_scalar "$profile_file" groups user (whoami))
 set -l dots_url (profile_scalar "$profile_file" caelestia dots_url "https://github.com/ChrisBlackoutDev/caelestia.git")
@@ -235,6 +285,8 @@ set -l cleanup_after_packages (profile_array "$profile_file" packages.cleanup re
 set -l services (profile_array "$profile_file" services enable)
 set -l groups (profile_array "$profile_file" groups add)
 set -l components (profile_array "$profile_file" caelestia enable_components)
+set -l sddm_theme (profile_scalar "$profile_file" display_manager.sddm theme "")
+set -l sddm_input_method (profile_scalar "$profile_file" display_manager.sddm input_method "")
 
 log "profile: $profile_file"
 
@@ -303,6 +355,7 @@ if test (count $aur_to_install) -gt 0
     run $aur_helper $aur_install_args $aur_to_install; or exit 1
 end
 validate_live_migration_ready; or exit 1
+configure_sddm "$sddm_theme" "$sddm_input_method"; or exit 1
 
 log "writing caelestia CLI dots source"
 if test $dry_run -eq 1

@@ -41,11 +41,16 @@ Before live migration on a real Arch system:
 ```sh
 pacman -Q networkmanager libnm
 pacman -Q hyprlock
+pacman -Q sddm sddm-astronaut-theme qt6-virtualkeyboard qt6-multimedia-ffmpeg
+test -d /usr/share/sddm/themes/pixel-sakura
+systemctl is-enabled sddm
 test -d /lib/modules/$(uname -r)
 sudo -v
 ```
 
 `networkmanager` and `libnm` must report the same version. If they do not, run a full system upgrade before touching the live Caelestia install.
+
+The SDDM checks confirm that the graphical login manager is installed, the configured Astronaut theme variant exists, and SDDM is enabled for next boot. If a live graphical target is available, also check `systemctl status sddm --no-pager` after the bootstrap.
 
 If `/lib/modules/$(uname -r)` is missing after a full upgrade, reboot before validating Docker, GPU, bridge networking, or other module-backed services.
 
@@ -78,4 +83,5 @@ These are reference checks after a live install. Do not execute them during docs
 - Locking still works after the shell is restarted, and Hyprland does not show the session-lock rescue screen.
 - Screenshots, screen recording, clipboard history, and emoji picker work.
 - Terminal toys launch: `tty-clock`, `cmatrix`, `pipes.sh`, and `cava`.
+- SDDM appears at boot with the Pixel Sakura Astronaut theme and accepts password login.
 - Browser, editor, file manager, thumbnails, audio, Bluetooth, printing, VPN, Docker, and desktop entries all work.

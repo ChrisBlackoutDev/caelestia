@@ -167,6 +167,8 @@ enable = ["NetworkManager", "bluetooth", "cups", "docker", "tailscaled", "mullva
 
 [display_manager.sddm]
 theme = "pixel-sakura"
+source_theme = "sddm-astronaut-theme"
+config_file = "Themes/pixel_sakura.conf"
 input_method = "qtvirtualkeyboard"
 
 [groups]

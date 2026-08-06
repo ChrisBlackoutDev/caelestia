@@ -52,7 +52,7 @@ The full upgrade preflight is intentional. Arch does not support partial upgrade
 
 This profile replicates the current workstation login manager with SDDM and Keyitdev's Astronaut theme family. The official package list includes `sddm` plus the Qt6 runtime pieces the greeter needs, and the AUR list includes `sddm-astronaut-theme`.
 
-The selected personal theme is `pixel-sakura`, configured by the bootstrap in `/etc/sddm.conf.d/theme.conf`:
+The package-managed theme directory is `sddm-astronaut-theme`, and the selected personal variant is `Themes/pixel_sakura.conf`. The bootstrap creates a small `/usr/share/sddm/themes/pixel-sakura` wrapper when the package does not provide one, then configures SDDM in `/etc/sddm.conf.d/theme.conf`:
 
 ```ini
 [Theme]

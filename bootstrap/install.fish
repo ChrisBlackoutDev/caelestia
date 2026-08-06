@@ -249,8 +249,65 @@ function install_root_text_file --argument-names destination
     return $install_status
 end
 
-function configure_sddm --argument-names theme input_method
-    if test -z "$theme" -a -z "$input_method"
+function ensure_sddm_theme_wrapper --argument-names theme source_theme config_file
+    if test -z "$theme"; or test -z "$source_theme"; or test -z "$config_file"
+        return 0
+    end
+
+    if test "$theme" = "$source_theme"
+        return 0
+    end
+
+    set -l theme_dir "/usr/share/sddm/themes/$theme"
+    set -l source_dir "/usr/share/sddm/themes/$source_theme"
+
+    if test -d "$theme_dir"
+        return 0
+    end
+
+    if test "$bootstrap_dry_run" -eq 0
+        if not test -d "$source_dir"
+            echo "error: SDDM source theme '$source_theme' is configured, but $source_dir does not exist." >&2
+            return 1
+        end
+        if not test -f "$source_dir/$config_file"
+            echo "error: SDDM source config '$config_file' is configured, but $source_dir/$config_file does not exist." >&2
+            return 1
+        end
+    end
+
+    log "creating SDDM theme wrapper: $theme from $source_theme#$config_file"
+    sudo_run install -d -m 755 "$theme_dir"; or return 1
+
+    for entry in Assets Backgrounds Components Fonts Main.qml Previews Themes
+        if test "$bootstrap_dry_run" -eq 1
+            printf '[dry-run] sudo ln -sfn %s %s\n' \
+                (string escape -- "../$source_theme/$entry") \
+                (string escape -- "$theme_dir/$entry")
+        else if test -e "$source_dir/$entry"
+            sudo_run ln -sfn "../$source_theme/$entry" "$theme_dir/$entry"; or return 1
+        end
+    end
+
+    install_root_text_file "$theme_dir/metadata.desktop" \
+        "[SddmGreeterTheme]" \
+        "Name=Pixel Sakura" \
+        "Description=Pixel Sakura variant of Keyitdev's sddm-astronaut-theme" \
+        "Author=keyitdev" \
+        "Website=https://github.com/Keyitdev/sddm-astronaut-theme" \
+        "License=GPL-3.0-or-later" \
+        "Type=sddm-theme" \
+        "Version=1.4" \
+        "ConfigFile=$config_file" \
+        "MainScript=Main.qml" \
+        "TranslationsDirectory=translations" \
+        "Theme-Id=$theme" \
+        "Theme-API=2.0" \
+        "QtVersion=6"; or return 1
+end
+
+function configure_sddm --argument-names theme input_method source_theme config_file
+    if test -z "$theme"; and test -z "$input_method"
         return 0
     end
 
@@ -258,6 +315,8 @@ function configure_sddm --argument-names theme input_method
     sudo_run install -d -m 755 /etc/sddm.conf.d; or return 1
 
     if test -n "$theme"
+        ensure_sddm_theme_wrapper "$theme" "$source_theme" "$config_file"; or return 1
+
         if test "$bootstrap_dry_run" -eq 0
             if not test -d "/usr/share/sddm/themes/$theme"
                 echo "error: SDDM theme '$theme' is configured, but /usr/share/sddm/themes/$theme does not exist." >&2
@@ -286,6 +345,8 @@ set -l services (profile_array "$profile_file" services enable)
 set -l groups (profile_array "$profile_file" groups add)
 set -l components (profile_array "$profile_file" caelestia enable_components)
 set -l sddm_theme (profile_scalar "$profile_file" display_manager.sddm theme "")
+set -l sddm_source_theme (profile_scalar "$profile_file" display_manager.sddm source_theme "")
+set -l sddm_config_file (profile_scalar "$profile_file" display_manager.sddm config_file "")
 set -l sddm_input_method (profile_scalar "$profile_file" display_manager.sddm input_method "")
 
 log "profile: $profile_file"
@@ -355,7 +416,7 @@ if test (count $aur_to_install) -gt 0
     run $aur_helper $aur_install_args $aur_to_install; or exit 1
 end
 validate_live_migration_ready; or exit 1
-configure_sddm "$sddm_theme" "$sddm_input_method"; or exit 1
+configure_sddm "$sddm_theme" "$sddm_input_method" "$sddm_source_theme" "$sddm_config_file"; or exit 1
 
 log "writing caelestia CLI dots source"
 if test $dry_run -eq 1

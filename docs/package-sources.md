@@ -31,9 +31,9 @@ The personal display manager setup is SDDM with Keyitdev's Astronaut theme famil
 - Official packages: `sddm`, `qt6-5compat`, `qt6-declarative`, `qt6-multimedia-ffmpeg`, `qt6-svg`, and `qt6-virtualkeyboard`.
 - AUR package: `sddm-astronaut-theme`.
 - Service: `sddm` under `[services].enable`.
-- Config: `[display_manager.sddm]` with `theme = "pixel-sakura"` and `input_method = "qtvirtualkeyboard"`.
+- Config: `[display_manager.sddm]` with `theme = "pixel-sakura"`, `source_theme = "sddm-astronaut-theme"`, `config_file = "Themes/pixel_sakura.conf"`, and `input_method = "qtvirtualkeyboard"`.
 
-The bootstrap writes `/etc/sddm.conf.d/theme.conf` and `/etc/sddm.conf.d/virtualkbd.conf` from the profile. Do not hand-edit `/usr/share/sddm/themes`; package or document theme changes instead.
+The bootstrap writes `/etc/sddm.conf.d/theme.conf` and `/etc/sddm.conf.d/virtualkbd.conf` from the profile. If the AUR package only installs the base `sddm-astronaut-theme` directory, the bootstrap creates a small `pixel-sakura` wrapper theme that points at package-managed Astronaut assets and selects `Themes/pixel_sakura.conf`. Do not hand-edit package-owned files in `/usr/share/sddm/themes/sddm-astronaut-theme`; package, profile, or document theme changes instead.
 
 ## Adding Or Removing An App
 

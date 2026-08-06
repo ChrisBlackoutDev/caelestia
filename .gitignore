@@ -15,3 +15,10 @@
 
 /zen/caelestia-firefox-integration/dist/
 /zen/caelestia-firefox-integration/node_modules/
+
+/bootstrap/pkgbuilds/*/pkg/
+/bootstrap/pkgbuilds/*/src/
+/bootstrap/pkgbuilds/*/*.pkg.tar*
+/packages/*/pkg/
+/packages/*/src/
+/packages/*/*.pkg.tar*

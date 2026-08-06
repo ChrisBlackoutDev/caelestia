@@ -10,7 +10,7 @@ After `archinstall`, SSH into the new machine as the target user:
 
 ```sh
 sudo pacman -Syu --needed git fish
-git clone https://github.com/ChrisBlackoutDev/caelestia.git ~/.local/share/caelestia
+git clone --branch codex/upstream-refresh-2026-08-05 https://github.com/ChrisBlackoutDev/caelestia.git ~/.local/share/caelestia
 cd ~/.local/share/caelestia
 fish bootstrap/install.fish --profile kensa-desktop --dry-run --noconfirm
 fish bootstrap/install.fish --profile kensa-desktop --noconfirm

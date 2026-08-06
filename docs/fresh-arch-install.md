@@ -15,7 +15,7 @@ This flow is for ChrisBlackoutDev's personal desktop after a normal `archinstall
 4. Clone this fork:
 
    ```sh
-   git clone https://github.com/ChrisBlackoutDev/caelestia.git ~/.local/share/caelestia
+   git clone --branch codex/upstream-refresh-2026-08-05 https://github.com/ChrisBlackoutDev/caelestia.git ~/.local/share/caelestia
    cd ~/.local/share/caelestia
    ```
 

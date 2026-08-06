@@ -55,7 +55,11 @@ function sudo_run
     if test "$bootstrap_dry_run" -eq 1
         printf '[dry-run] sudo %s\n' (string join -- ' ' (string escape -- $argv))
     else
-        sudo $argv
+        set -l sudo_cmd sudo
+        if set -q SUDO_ASKPASS
+            set sudo_cmd sudo -A
+        end
+        command $sudo_cmd $argv
     end
 end
 
@@ -65,9 +69,17 @@ function sudo_run_inhibited
             (string escape -- "Caelestia bootstrap live migration") \
             (string join -- ' ' (string escape -- $argv))
     else if command -q systemd-inhibit
-        sudo systemd-inhibit --what=idle:sleep:shutdown --why "Caelestia bootstrap live migration" $argv
+        set -l sudo_cmd sudo
+        if set -q SUDO_ASKPASS
+            set sudo_cmd sudo -A
+        end
+        command $sudo_cmd systemd-inhibit --what=idle:sleep:shutdown --why "Caelestia bootstrap live migration" $argv
     else
-        sudo $argv
+        set -l sudo_cmd sudo
+        if set -q SUDO_ASKPASS
+            set sudo_cmd sudo -A
+        end
+        command $sudo_cmd $argv
     end
 end
 
@@ -168,38 +180,40 @@ set -l system_upgrade_args pacman -Syu
 if test $noconfirm -eq 1
     set -a system_upgrade_args --noconfirm
 end
-sudo_run_inhibited $system_upgrade_args
+sudo_run_inhibited $system_upgrade_args; or exit 1
 validate_split_packages; or exit 1
 
 log "installing official packages"
 if test (count $official_packages) -gt 0
-    sudo_run pacman -S --needed --noconfirm $official_packages
+    sudo_run pacman -S --needed --noconfirm $official_packages; or exit 1
 end
 validate_live_migration_ready; or exit 1
 
 if not command -q $aur_helper
     log "installing AUR helper: $aur_helper"
-    sudo_run pacman -S --needed --noconfirm base-devel git
+    sudo_run pacman -S --needed --noconfirm base-devel git; or exit 1
     set -l helper_dir "$HOME/.cache/aur/$aur_helper"
     if test $dry_run -eq 1
         log "would clone/build https://aur.archlinux.org/$aur_helper.git in $helper_dir"
     else
-        mkdir -p (dirname "$helper_dir")
+        mkdir -p (dirname "$helper_dir"); or exit 1
         if test -d "$helper_dir/.git"
-            git -C "$helper_dir" pull --ff-only
+            git -C "$helper_dir" pull --ff-only; or exit 1
         else
-            git clone "https://aur.archlinux.org/$aur_helper.git" "$helper_dir"
+            git clone "https://aur.archlinux.org/$aur_helper.git" "$helper_dir"; or exit 1
         end
-        command pushd "$helper_dir" >/dev/null
+        command pushd "$helper_dir" >/dev/null; or exit 1
         makepkg -si --noconfirm
+        set -l makepkg_status $status
         command popd >/dev/null
+        test $makepkg_status -eq 0; or exit $makepkg_status
     end
 end
 
 set -l aur_to_install (filter_helper_packages $aur_helper $aur_packages)
 if test (count $aur_to_install) -gt 0
     log "installing AUR packages with $aur_helper"
-    run $aur_helper -S --needed --noconfirm $aur_to_install
+    run $aur_helper -S --needed --noconfirm $aur_to_install; or exit 1
 end
 validate_live_migration_ready; or exit 1
 
@@ -227,7 +241,7 @@ data.setdefault("dots", {})
 data["dots"]["url"] = url
 data["dots"]["branch"] = branch
 path.write_text(json.dumps(data, indent=4, sort_keys=True) + "\n", encoding="utf-8")
-' "$dots_url" "$dots_branch"
+' "$dots_url" "$dots_branch"; or exit 1
 end
 
 if command -q caelestia
@@ -241,7 +255,7 @@ if command -q caelestia
     if test $noconfirm -eq 1
         set -a install_args --noconfirm
     end
-    run_inhibited caelestia $install_args
+    run_inhibited caelestia $install_args; or exit 1
 else
     log "caelestia-cli not found yet; skipping caelestia install"
 end
@@ -250,7 +264,7 @@ validate_live_migration_ready; or exit 1
 if test (count $services) -gt 0
     log "enabling services"
     for service in $services
-        sudo_run systemctl enable --now $service
+        sudo_run systemctl enable --now $service; or exit 1
     end
 end
 
@@ -258,7 +272,7 @@ if test (count $groups) -gt 0
     log "adding $target_user to groups"
     for group in $groups
         if getent group $group >/dev/null
-            sudo_run usermod -aG $group $target_user
+            sudo_run usermod -aG $group $target_user; or exit 1
         else
             log "group not present, skipping: $group"
         end

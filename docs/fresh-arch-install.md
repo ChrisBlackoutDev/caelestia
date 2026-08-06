@@ -49,6 +49,7 @@ The full upgrade preflight is intentional. Arch does not support partial upgrade
 
 - Run the dry-run first.
 - Do not invoke `caelestia install` directly for a fresh machine; use `bootstrap/install.fish` so the preflight checks run.
+- When running over SSH, use an interactive sudo context such as `ssh -t` or a deliberate `SUDO_ASKPASS` setup. The bootstrap aborts on failed sudo commands instead of continuing after a password prompt fails.
 - Do not go AFK during a live desktop migration. Keep the session unlocked while shell, lock, and compositor-adjacent packages are being changed.
 - The bootstrap uses `systemd-inhibit` where available, but compositor-level idle lockers may still trigger.
 - Avoid live migration on an active desktop when legacy symlinks from `~/.local/share/caelestia` to `~/.config` may still exist.

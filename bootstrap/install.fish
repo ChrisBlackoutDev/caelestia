@@ -104,6 +104,19 @@ function filter_helper_packages
     end
 end
 
+function aur_helper_build_deps --argument-names helper
+    switch "$helper"
+        case paru
+            printf '%s\n' cargo
+        case yay
+            printf '%s\n' go
+    end
+end
+
+function built_package_files --argument-names dir
+    find "$dir" -maxdepth 1 -type f -name '*.pkg.tar.zst' -print
+end
+
 function package_version --argument-names package
     pacman -Q "$package" 2>/dev/null | string split ' ' -f 2
 end
@@ -192,6 +205,11 @@ validate_live_migration_ready; or exit 1
 if not command -q $aur_helper
     log "installing AUR helper: $aur_helper"
     sudo_run pacman -S --needed --noconfirm base-devel git; or exit 1
+    set -l helper_build_deps (aur_helper_build_deps $aur_helper)
+    if test (count $helper_build_deps) -gt 0
+        sudo_run pacman -S --needed --noconfirm $helper_build_deps; or exit 1
+    end
+
     set -l helper_dir "$HOME/.cache/aur/$aur_helper"
     if test $dry_run -eq 1
         log "would clone/build https://aur.archlinux.org/$aur_helper.git in $helper_dir"
@@ -204,10 +222,17 @@ if not command -q $aur_helper
         end
         set -l previous_dir (pwd)
         cd "$helper_dir"; or exit 1
-        makepkg -si --noconfirm
+        makepkg --noconfirm
         set -l makepkg_status $status
         cd "$previous_dir"; or exit 1
         test $makepkg_status -eq 0; or exit $makepkg_status
+
+        set -l helper_packages (built_package_files "$helper_dir")
+        if test (count $helper_packages) -eq 0
+            echo "error: no built package found for AUR helper '$aur_helper' in $helper_dir" >&2
+            exit 1
+        end
+        sudo_run pacman -U --needed --noconfirm $helper_packages; or exit 1
     end
 end
 

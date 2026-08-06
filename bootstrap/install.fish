@@ -183,6 +183,18 @@ function validate_live_migration_ready
     require_installed hyprlock "Hyprland lock fallback must exist before a live shell/session-lock migration."; or return 1
 end
 
+function require_tty_for_caelestia_install
+    if test "$bootstrap_dry_run" -eq 1
+        return 0
+    end
+
+    if not test -t 0
+        echo "error: live caelestia install requires a TTY because caelestia-cli may invoke sudo internally." >&2
+        echo "Rerun over SSH with a pseudo-terminal, for example: ssh -tt <host> 'cd ~/.local/share/caelestia && fish bootstrap/install.fish --profile $profile --noconfirm'" >&2
+        return 1
+    end
+end
+
 function remove_installed_packages --argument-names label
     set -l packages $argv[2..-1]
     set -l installed
@@ -306,6 +318,7 @@ end
 
 if command -q caelestia
     validate_live_migration_ready; or exit 1
+    require_tty_for_caelestia_install; or exit 1
     log "installing Caelestia components"
     if test -n "$HYPRLAND_INSTANCE_SIGNATURE"
         log "Hyprland is running; keep this session unlocked until the Caelestia install finishes."

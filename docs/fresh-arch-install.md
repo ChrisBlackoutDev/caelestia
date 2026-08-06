@@ -28,8 +28,10 @@ This flow is for ChrisBlackoutDev's personal desktop after a normal `archinstall
 6. Run the bootstrap:
 
    ```sh
-   fish bootstrap/install.fish --profile kensa-desktop --noconfirm
+   ssh -tt kensa-thinkcentre 'cd ~/.local/share/caelestia && fish bootstrap/install.fish --profile kensa-desktop --noconfirm'
    ```
+
+   For a local keyboard/monitor session, run the same `fish bootstrap/install.fish ...` command directly from the repo. For SSH, allocate a pseudo-terminal with `ssh -tt`; `caelestia-cli` may invoke `sudo` internally while installing components, and that internal sudo path does not use the bootstrap's askpass helper.
 
 ## What The Bootstrap Does
 
@@ -49,7 +51,7 @@ The full upgrade preflight is intentional. Arch does not support partial upgrade
 
 - Run the dry-run first.
 - Do not invoke `caelestia install` directly for a fresh machine; use `bootstrap/install.fish` so the preflight checks run.
-- When running over SSH, use an interactive sudo context such as `ssh -t` or a deliberate `SUDO_ASKPASS` setup. The bootstrap aborts on failed sudo commands instead of continuing after a password prompt fails.
+- When running over SSH, use an interactive sudo context such as `ssh -tt`. `SUDO_ASKPASS` is enough for bootstrap-owned sudo commands, but not for `caelestia-cli`'s internal sudo calls during live component installation.
 - Expect some AUR packages to build from source. On slower machines, `quickshell-git` and AppImage integration packages can look quiet or repetitive for several minutes; watch for an explicit error before interrupting.
 - Do not go AFK during a live desktop migration. Keep the session unlocked while shell, lock, and compositor-adjacent packages are being changed.
 - The bootstrap uses `systemd-inhibit` where available. In noninteractive SSH sessions, user-session inhibition may be denied; the bootstrap logs that and continues, so do not rely on it as the only protection during a live desktop migration.

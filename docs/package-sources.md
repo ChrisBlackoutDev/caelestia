@@ -38,6 +38,10 @@ Keep split-package runtime pairs explicit when a profile includes one side. For 
 
 `hyprlock` is part of the desktop package set and the `hypr` component. Even when Caelestia/Quickshell provides the primary lock UI, `hyprlock` must be installed before live shell/session-lock migration so Hyprland has a known lockscreen fallback available.
 
+Keep provider choices explicit when unattended pacman installs would otherwise pick the first provider. `tesseract-data-eng` is listed so OCR dependencies get English data instead of an arbitrary language package, and `tinyxxd` is listed so packages needing `xxd` do not pull in the larger `gvim` package by default.
+
+Some AUR packages used here are source builds, not binary downloads. `quickshell-git` and AppImage integration dependencies can compile for a long time on older desktops; treat steady compiler output as progress, not a hang. If source build time becomes too painful, prefer swapping the package source in the profile to a trustworthy binary package rather than adding one-off install commands to the bootstrap.
+
 ## Hardcoded Paths
 
 Avoid hardcoded `/home/kensa` paths unless the target format requires an absolute executable path. Browser native-messaging manifests are the known exception; keep those paths isolated and documented.

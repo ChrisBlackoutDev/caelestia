@@ -52,6 +52,7 @@ packages = [
     "zathura",
     "zathura-pdf-mupdf",
     "xournalpp",
+    "tesseract-data-eng",
 ]
 
 [packages.official.desktop]
@@ -99,6 +100,7 @@ packages = [
     "nodejs",
     "npm",
     "tree-sitter-cli",
+    "tinyxxd",
 ]
 
 [packages.official.system]

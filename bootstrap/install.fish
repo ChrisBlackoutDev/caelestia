@@ -87,11 +87,11 @@ end
 
 function run_inhibited
     if test "$bootstrap_dry_run" -eq 1
-        printf '[dry-run] systemd-inhibit --what=idle:sleep --why %s %s\n' \
+        printf '[dry-run] systemd-inhibit --what=idle --why %s %s\n' \
             (string escape -- "Caelestia bootstrap live migration") \
             (string join -- ' ' (string escape -- $argv))
     else if command -q systemd-inhibit
-        systemd-inhibit --what=idle:sleep --why "Caelestia bootstrap live migration" $argv
+        systemd-inhibit --what=idle --why "Caelestia bootstrap live migration" $argv
         set -l inhibit_status $status
         if test $inhibit_status -eq 0
             return 0

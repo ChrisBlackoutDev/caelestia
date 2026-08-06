@@ -54,7 +54,7 @@ The full upgrade preflight is intentional. Arch does not support partial upgrade
 - When running over SSH, use an interactive sudo context such as `ssh -tt`. `SUDO_ASKPASS` is enough for bootstrap-owned sudo commands, but not for `caelestia-cli`'s internal sudo calls during live component installation.
 - Expect some AUR packages to build from source. On slower machines, `quickshell-git` and AppImage integration packages can look quiet or repetitive for several minutes; watch for an explicit error before interrupting.
 - Do not go AFK during a live desktop migration. Keep the session unlocked while shell, lock, and compositor-adjacent packages are being changed.
-- The bootstrap uses `systemd-inhibit` where available. Root-owned upgrade/package phases inhibit idle, sleep, and shutdown; user-owned Caelestia phases only request idle/sleep inhibition to avoid polkit shutdown prompts over SSH. If inhibition is denied, the bootstrap logs that and continues, so do not rely on it as the only protection during a live desktop migration.
+- The bootstrap uses `systemd-inhibit` where available. Root-owned upgrade/package phases inhibit idle, sleep, and shutdown; user-owned Caelestia phases only request idle inhibition to avoid polkit prompts over SSH. If inhibition is denied, the bootstrap logs that and continues, so do not rely on it as the only protection during a live desktop migration.
 - If the full upgrade installs a newer kernel, reboot before judging Docker, bridge networking, GPU drivers, or other kernel-module-dependent services. A service may be enabled but fail to start until the booted kernel matches `/lib/modules`.
 - Avoid live migration on an active desktop when legacy symlinks from `~/.local/share/caelestia` to `~/.config` may still exist.
 

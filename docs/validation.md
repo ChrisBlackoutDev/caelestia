@@ -41,12 +41,15 @@ Before live migration on a real Arch system:
 ```sh
 pacman -Q networkmanager libnm
 pacman -Q hyprlock
+test -d /lib/modules/$(uname -r)
 sudo -v
 ```
 
 `networkmanager` and `libnm` must report the same version. If they do not, run a full system upgrade before touching the live Caelestia install.
 
-For SSH installs, make sure sudo can authenticate in that session before starting the live bootstrap. Use `ssh -t` for an interactive run, or provide a temporary askpass helper outside the repo and export `SUDO_ASKPASS`.
+If `/lib/modules/$(uname -r)` is missing after a full upgrade, reboot before validating Docker, GPU, bridge networking, or other module-backed services.
+
+For SSH installs, make sure sudo can authenticate in that session before starting the live bootstrap. Use `ssh -tt` for live installs; an askpass helper is enough for bootstrap-owned sudo calls, but not for `caelestia-cli`'s internal sudo calls.
 
 ## Shell Fork Changes
 

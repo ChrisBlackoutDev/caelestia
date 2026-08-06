@@ -38,6 +38,8 @@ if test $status -ne 0
 end
 
 set -g bootstrap_dry_run $dry_run
+set -g reboot_recommended 0
+set -g service_start_failures
 
 function log
     printf '[bootstrap] %s\n' "$argv"
@@ -183,6 +185,18 @@ function validate_live_migration_ready
     require_installed hyprlock "Hyprland lock fallback must exist before a live shell/session-lock migration."; or return 1
 end
 
+function warn_if_running_kernel_modules_missing
+    if test "$bootstrap_dry_run" -eq 1
+        return 0
+    end
+
+    set -l running_kernel (uname -r)
+    if not test -d "/lib/modules/$running_kernel"
+        set -g reboot_recommended 1
+        log "warning: module tree for running kernel $running_kernel is missing; reboot before starting kernel-module-dependent services such as Docker"
+    end
+end
+
 function require_tty_for_caelestia_install
     if test "$bootstrap_dry_run" -eq 1
         return 0
@@ -231,6 +245,7 @@ if test $noconfirm -eq 1
 end
 sudo_run_inhibited $system_upgrade_args; or exit 1
 validate_split_packages; or exit 1
+warn_if_running_kernel_modules_missing
 
 remove_installed_packages profile-preinstall-cleanup $cleanup_before_packages; or exit 1
 
@@ -337,7 +352,11 @@ validate_live_migration_ready; or exit 1
 if test (count $services) -gt 0
     log "enabling services"
     for service in $services
-        sudo_run systemctl enable --now $service; or exit 1
+        sudo_run systemctl enable $service; or exit 1
+        if not sudo_run systemctl start $service
+            set -a service_start_failures "$service"
+            log "warning: service enabled but failed to start now: $service"
+        end
     end
 end
 
@@ -350,6 +369,14 @@ if test (count $groups) -gt 0
             log "group not present, skipping: $group"
         end
     end
+end
+
+if test (count $service_start_failures) -gt 0
+    log "services needing manual check or reboot before start: "(string join ', ' $service_start_failures)
+end
+
+if test "$reboot_recommended" -eq 1
+    log "reboot recommended before validating Docker, kernel modules, or a graphical login"
 end
 
 log "done"

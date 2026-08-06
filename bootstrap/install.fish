@@ -202,10 +202,11 @@ if not command -q $aur_helper
         else
             git clone "https://aur.archlinux.org/$aur_helper.git" "$helper_dir"; or exit 1
         end
-        command pushd "$helper_dir" >/dev/null; or exit 1
+        set -l previous_dir (pwd)
+        cd "$helper_dir"; or exit 1
         makepkg -si --noconfirm
         set -l makepkg_status $status
-        command popd >/dev/null
+        cd "$previous_dir"; or exit 1
         test $makepkg_status -eq 0; or exit $makepkg_status
     end
 end

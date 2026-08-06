@@ -183,13 +183,29 @@ function validate_live_migration_ready
     require_installed hyprlock "Hyprland lock fallback must exist before a live shell/session-lock migration."; or return 1
 end
 
+function remove_installed_packages --argument-names label
+    set -l packages $argv[2..-1]
+    set -l installed
+    for package in $packages
+        if pacman -Q "$package" >/dev/null 2>&1
+            set -a installed "$package"
+        end
+    end
+
+    if test (count $installed) -gt 0
+        log "removing $label packages: "(string join ', ' $installed)
+        sudo_run pacman -Rns --noconfirm $installed; or return 1
+    end
+end
+
 set -l aur_helper (profile_scalar "$profile_file" caelestia aur_helper paru)
 set -l target_user (profile_scalar "$profile_file" groups user (whoami))
 set -l dots_url (profile_scalar "$profile_file" caelestia dots_url "https://github.com/ChrisBlackoutDev/caelestia.git")
 set -l dots_branch (profile_scalar "$profile_file" caelestia dots_branch "codex/upstream-refresh-2026-08-05")
 set -l official_packages (profile_packages "$profile_file" official)
 set -l aur_packages (profile_packages "$profile_file" aur)
-set -l cleanup_packages (profile_array "$profile_file" packages.cleanup remove_if_installed)
+set -l cleanup_before_packages (profile_array "$profile_file" packages.cleanup remove_before_install)
+set -l cleanup_after_packages (profile_array "$profile_file" packages.cleanup remove_after_install)
 set -l services (profile_array "$profile_file" services enable)
 set -l groups (profile_array "$profile_file" groups add)
 set -l components (profile_array "$profile_file" caelestia enable_components)
@@ -204,24 +220,13 @@ end
 sudo_run_inhibited $system_upgrade_args; or exit 1
 validate_split_packages; or exit 1
 
-if test (count $cleanup_packages) -gt 0
-    set -l installed_cleanup
-    for package in $cleanup_packages
-        if pacman -Q "$package" >/dev/null 2>&1
-            set -a installed_cleanup "$package"
-        end
-    end
-
-    if test (count $installed_cleanup) -gt 0
-        log "removing profile cleanup packages: "(string join ', ' $installed_cleanup)
-        sudo_run pacman -Rns --noconfirm $installed_cleanup; or exit 1
-    end
-end
+remove_installed_packages profile-preinstall-cleanup $cleanup_before_packages; or exit 1
 
 log "installing official packages"
 if test (count $official_packages) -gt 0
     sudo_run pacman -S --needed --noconfirm $official_packages; or exit 1
 end
+remove_installed_packages profile-postinstall-cleanup $cleanup_after_packages; or exit 1
 validate_live_migration_ready; or exit 1
 
 if not command -q $aur_helper

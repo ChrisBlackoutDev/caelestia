@@ -153,7 +153,8 @@ packages = [
 
 [packages.cleanup]
 purpose = "Known accidental provider/default packages to remove before installing preferred packages"
-remove_if_installed = ["gvim", "tesseract-data-afr"]
+remove_before_install = ["gvim"]
+remove_after_install = ["tesseract-data-afr"]
 
 [services]
 enable = ["NetworkManager", "bluetooth", "cups", "docker", "tailscaled", "mullvad-daemon"]

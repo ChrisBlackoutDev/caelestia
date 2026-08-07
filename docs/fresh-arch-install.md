@@ -40,6 +40,7 @@ This flow is for ChrisBlackoutDev's personal desktop after a normal `archinstall
 - Installs official repo packages first.
 - Installs or reuses the configured AUR helper.
 - Installs AUR packages second.
+- Installs narrow Caelestia theme sudoers rules for noninteractive Papirus folder coloring and Chromium-family browser policy updates.
 - Configures SDDM as the display manager, using the Astronaut theme package and the profile-selected `pixel-sakura` theme.
 - Writes `~/.config/caelestia/cli.json` so `caelestia-cli` points at this fork and branch.
 - Runs `caelestia install` with the profile's enabled components.
@@ -47,6 +48,18 @@ This flow is for ChrisBlackoutDev's personal desktop after a normal `archinstall
 - Adds the target user to configured groups.
 
 The full upgrade preflight is intentional. Arch does not support partial upgrades; installing a named package such as `networkmanager` without upgrading the matching `libnm` package can break networking after restart.
+
+## Theme Root Hooks
+
+`caelestia-cli` applies some theme state outside the user's home directory. In particular, it colors Papirus folder icons with `papirus-folders` and writes Chromium-family managed browser policy files such as `/etc/chromium/policies/managed/caelestia.json`.
+
+The bootstrap owns that privileged setup. It creates policy directories for installed Chromium-family browsers and writes `/etc/sudoers.d/caelestia-theme`, limited to these exact root hooks:
+
+- `papirus-folders -C <color> -u`
+- creating Chromium, Brave, and Google Chrome managed-policy directories
+- writing each browser's `caelestia.json` policy file
+
+Do not move these commands into Hyprland startup. Startup should be able to apply a Caelestia scheme without emitting `sudo: a password is required` errors.
 
 ## Display Manager
 

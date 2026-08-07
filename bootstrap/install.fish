@@ -249,6 +249,75 @@ function install_root_text_file --argument-names destination
     return $install_status
 end
 
+function install_sudoers_file --argument-names destination
+    set -l lines $argv[2..-1]
+
+    if test "$bootstrap_dry_run" -eq 1
+        printf '[dry-run] validate and write sudoers %s\n' "$destination"
+        for line in $lines
+            printf '[dry-run]   %s\n' "$line"
+        end
+        return 0
+    end
+
+    set -l tmp (mktemp); or return 1
+    for line in $lines
+        printf '%s\n' "$line" >>"$tmp"; or begin
+            command rm -f "$tmp"
+            return 1
+        end
+    end
+
+    sudo_run visudo -cf "$tmp"; or begin
+        command rm -f "$tmp"
+        return 1
+    end
+
+    sudo_run install -m 440 "$tmp" "$destination"
+    set -l install_status $status
+    command rm -f "$tmp"
+    return $install_status
+end
+
+function configure_browser_policy_dirs
+    set -l browsers \
+        chromium /etc/chromium/policies/managed \
+        brave /etc/brave/policies/managed \
+        google-chrome-stable /etc/opt/chrome/policies/managed
+
+    set -l i 1
+    while test $i -le (count $browsers)
+        set -l browser $browsers[$i]
+        set -l policy_dir $browsers[(math $i + 1)]
+        set i (math $i + 2)
+
+        if command -q "$browser"
+            sudo_run install -d -m 755 "$policy_dir"; or return 1
+        end
+    end
+end
+
+function configure_caelestia_theme_privileges --argument-names user
+    if test -z "$user"
+        return 0
+    end
+
+    if not string match -qr '^[A-Za-z0-9_.-]+$' -- "$user"
+        echo "error: refusing to write sudoers rule for unsupported user name '$user'" >&2
+        return 1
+    end
+
+    log "configuring Caelestia theme root helpers"
+    configure_browser_policy_dirs; or return 1
+    install_sudoers_file /etc/sudoers.d/caelestia-theme \
+        "# Managed by ChrisBlackoutDev Caelestia bootstrap." \
+        "# Allows caelestia-cli theme updates to run their exact noninteractive root hooks without login-time sudo prompts." \
+        "Cmnd_Alias CAELESTIA_PAPIRUS_FOLDERS = /usr/bin/papirus-folders -C * -u" \
+        "Cmnd_Alias CAELESTIA_BROWSER_POLICY_DIRS = /usr/bin/mkdir -p /etc/chromium/policies/managed, /usr/bin/mkdir -p /etc/brave/policies/managed, /usr/bin/mkdir -p /etc/opt/chrome/policies/managed" \
+        "Cmnd_Alias CAELESTIA_BROWSER_POLICY_FILES = /usr/bin/tee /etc/chromium/policies/managed/caelestia.json, /usr/bin/tee /etc/brave/policies/managed/caelestia.json, /usr/bin/tee /etc/opt/chrome/policies/managed/caelestia.json" \
+        "$user ALL=(root) NOPASSWD: CAELESTIA_PAPIRUS_FOLDERS, CAELESTIA_BROWSER_POLICY_DIRS, CAELESTIA_BROWSER_POLICY_FILES"; or return 1
+end
+
 function ensure_sddm_theme_wrapper --argument-names theme source_theme config_file
     if test -z "$theme"; or test -z "$source_theme"; or test -z "$config_file"
         return 0
@@ -416,6 +485,7 @@ if test (count $aur_to_install) -gt 0
     run $aur_helper $aur_install_args $aur_to_install; or exit 1
 end
 validate_live_migration_ready; or exit 1
+configure_caelestia_theme_privileges "$target_user"; or exit 1
 configure_sddm "$sddm_theme" "$sddm_input_method" "$sddm_source_theme" "$sddm_config_file"; or exit 1
 
 log "writing caelestia CLI dots source"

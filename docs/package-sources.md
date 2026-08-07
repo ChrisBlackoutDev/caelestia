@@ -49,6 +49,8 @@ Keep split-package runtime pairs explicit when a profile includes one side. For 
 
 `hyprlock` is part of the desktop package set and the `hypr` component. Even when Caelestia/Quickshell provides the primary lock UI, `hyprlock` must be installed before live shell/session-lock migration so Hyprland has a known lockscreen fallback available.
 
+Caelestia theme updates have two privileged side effects: Papirus folder coloring and Chromium-family managed browser policy. Keep their permissions in `bootstrap/install.fish`, which writes `/etc/sudoers.d/caelestia-theme`; do not add `sudo papirus-folders` or `sudo tee /etc/chromium/...` commands to Hyprland startup hooks.
+
 Keep provider choices explicit when unattended pacman installs would otherwise pick the first provider. `tesseract-data-eng` is listed so OCR dependencies get English data instead of an arbitrary language package, and `tinyxxd` is listed so packages needing `xxd` do not pull in the larger `gvim` package by default.
 
 Known accidental provider packages belong in `[packages.cleanup]`, not in ad hoc install notes. Use `remove_before_install` for packages that conflict with preferred providers, and `remove_after_install` when the preferred replacement must be installed first to keep dependencies satisfied. This lets reruns converge from an earlier partial/default-provider state.

@@ -48,6 +48,7 @@ This is ChrisBlackoutDev's personal Arch Linux, Hyprland, and Caelestia desktop 
 - Validate split packages such as `networkmanager/libnm` before live migration.
 - Keep `hyprlock` installed as part of the desktop profile before shell/session-lock migration.
 - Keep `sddm`, the Astronaut theme package, and the configured SDDM theme in place before expecting graphical login after reboot.
+- Keep Caelestia's Papirus folder-coloring and Chromium managed-policy privileges in `/etc/sudoers.d/caelestia-theme` via the bootstrap; do not add sudo prompts to session startup.
 - Stay present and keep the desktop unlocked during live shell/compositor-adjacent migrations.
 
 ## Validation

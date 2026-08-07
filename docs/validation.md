@@ -44,13 +44,18 @@ pacman -Q hyprlock
 pacman -Q sddm sddm-astronaut-theme qt6-virtualkeyboard qt6-multimedia-ffmpeg
 test -d /usr/share/sddm/themes/pixel-sakura
 systemctl is-enabled sddm
-test -d /lib/modules/$(uname -r)
 sudo -v
+sudo visudo -cf /etc/sudoers.d/caelestia-theme
+sudo -n -l /usr/bin/papirus-folders -C green -u
+test -d /etc/chromium/policies/managed
+test -d /lib/modules/$(uname -r)
 ```
 
 `networkmanager` and `libnm` must report the same version. If they do not, run a full system upgrade before touching the live Caelestia install.
 
 The SDDM checks confirm that the graphical login manager is installed, the configured Astronaut theme variant exists, and SDDM is enabled for next boot. If a live graphical target is available, also check `systemctl status sddm --no-pager` after the bootstrap.
+
+The sudoers checks confirm that Caelestia scheme updates can run their noninteractive Papirus and Chromium policy hooks without login-time password prompts. If Chromium is not installed, skip the Chromium policy directory check.
 
 If `/lib/modules/$(uname -r)` is missing after a full upgrade, reboot before validating Docker, GPU, bridge networking, or other module-backed services.
 
@@ -84,4 +89,5 @@ These are reference checks after a live install. Do not execute them during docs
 - Screenshots, screen recording, clipboard history, and emoji picker work.
 - Terminal toys launch: `tty-clock`, `cmatrix`, `pipes.sh`, and `cava`.
 - SDDM appears at boot with the Pixel Sakura Astronaut theme and accepts password login.
+- Boot logs do not show `sudo: a password is required` for `papirus-folders` or Chromium `caelestia.json` policy writes after a scheme apply.
 - Browser, editor, file manager, thumbnails, audio, Bluetooth, printing, VPN, Docker, and desktop entries all work.

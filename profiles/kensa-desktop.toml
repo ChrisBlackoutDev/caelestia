@@ -46,6 +46,7 @@ packages = [
     "libreoffice-fresh",
     "obsidian",
     "mpv",
+    "qbittorrent",
     "gwenview",
     "kolourpaint",
     "krita",

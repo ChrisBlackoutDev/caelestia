@@ -2,6 +2,7 @@
 Type=Application
 Name=OrcaSlicer
 Exec=env GDK_SCALE=2 GDK_DPI_SCALE=0.75 /opt/orca-slicer/AppRun %U
+TryExec=/opt/orca-slicer/AppRun
 Icon=OrcaSlicer
 Terminal=false
 Categories=Utility;

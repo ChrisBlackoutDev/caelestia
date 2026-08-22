@@ -2,218 +2,133 @@
 
 ## ChrisBlackoutDev personal fork
 
-This branch is a personal, AI-assisted modification of the upstream
-[`caelestia-dots/caelestia`](https://github.com/caelestia-dots/caelestia)
-dotfiles. The base rice, installer, Hyprland layout, Caelestia Shell/CLI
-integration, and app theming come from the upstream project; the changes below
-are local customizations for my own Arch setup.
+This is a personal, AI-assisted fork of
+[`caelestia-dots/caelestia`](https://github.com/caelestia-dots/caelestia).
+It tracks the current Lua-based Hyprland configuration and Caelestia CLI
+installer while retaining the custom desktop behavior used on my Arch setup.
 
-Personal changes currently included:
+Personal changes include:
 
-- Use Firefox for the `Super + W` browser shortcut instead of Zen Browser.
-- Add a Cursor desktop entry that launches
-  `~/Applications/cursor/cursor.AppImage`, so Cursor appears in the Caelestia
-  launcher opened with `Super`.
-- Add a Caelestia Shell config that changes idle locking to 30 minutes, with
-  display sleep and suspend delayed after that.
-- Install Caelestia Shell from
-  [`ChrisBlackoutDev/shell-fork`](https://github.com/ChrisBlackoutDev/shell-fork)
-  after the metapackage install so local shell fixes are used instead of the
-  stock AUR release.
-- Install Thunar thumbnail services and enable thumbnails on removable drives
-  so image previews and media cover thumbnails appear in the file explorer.
-- Replace the default active-window floating toggle with a current-workspace
-  toggle on `Super + Alt + Space`. The custom script toggles all windows on the
-  active workspace between tiled and floating, preserves tiled geometry when
-  entering floating mode, and uses screen position to produce a more intuitive
-  tiled layout when returning to tiling.
-- Add a top-right Quickshell AI assistant helper panel with a narrow edge
-  trigger zone so it does not open accidentally while moving around the desktop.
-- Add fish wrappers for `tty-clock`, `cmatrix`, `pipes.sh`, and `cava` so
-  terminal toys follow the active Caelestia wallpaper palette by default.
-  `tty-clock` starts centered, `cmatrix` uses a transparent truecolour rain
-  renderer, `pipes.sh` restores the terminal palette after its reset-heavy
-  cleanup, and `cava` gets a fresh generated gradient on every launch.
+- Firefox as the default browser (`Super + W`) and VSCodium as the editor.
+- A shell configuration with a 30-minute idle lock and delayed display sleep
+  and suspend.
+- A current-workspace floating toggle on `Super + Alt + Space` that preserves
+  window geometry.
+- A top-right Quickshell AI helper with a narrow edge trigger.
+- Thunar thumbnailing and removable-media defaults.
+- Cursor, Steam, and OrcaSlicer launcher entries.
+- Wallpaper-palette-aware wrappers for `tty-clock`, `cmatrix`, `pipes.sh`, and
+  `cava`.
+- Hardened Firefox and VSCodium theme integrations.
 
-Code-review fixes included in this fork:
+The original legacy installer and metapackage have been removed. Current
+Hyprland releases use this repository's Lua configuration and the component
+manifest in [`manifest.toml`](manifest.toml).
 
-- Harden AUR-helper bootstrapping by building from a fresh temporary directory
-  and honoring `--noconfirm` during `makepkg`.
-- Fix workspace-group shortcuts for `Super + Ctrl + #` and workspace slots that
-  end in `0`.
-- Make first-run config creation less racy by seeding Hypr user config files
-  during install and sourcing default colours before generated colours.
-- Fix PiP initial placement, game tearing rules, Firefox package metadata,
-  Cursor desktop-entry portability, Zen profile handling, and VSCode/CaelestiaFox
-  integration error handling.
+## Installation on Arch Linux
 
-This is the main repo of the caelestia dots and contains the user configs for
-apps. This repo also includes an install script to install the entire dots.
-
-## Installation
-
-Simply clone this repo and run the install script (you need
-[`fish`](https://github.com/fish-shell/fish-shell) installed).
-
-> [!WARNING]
-> The install script symlinks all configs into place, so you CANNOT
-> move/remove the repo folder once you run the install script. If
-> you do, most apps will not behave properly and some (e.g. Hyprland)
-> will fail to start completely. I recommend cloning the repo to
-> `~/.local/share/caelestia`.
-
-The install script has some options for installing configs for some apps.
-
-```
-$ ./install.fish -h
-usage: ./install.fish [-h] [--noconfirm] [--spotify] [--vscode] [--discord] [--zen] [--aur-helper]
-
-options:
-  -h, --help                  show this help message and exit
-  --noconfirm                 do not confirm package installation
-  --spotify                   install Spotify (Spicetify)
-  --vscode=[codium|code]      install VSCodium (or VSCode)
-  --discord                   install Discord (OpenAsar + Equicord)
-  --zen                       install Zen browser
-  --aur-helper=[yay|paru]     the AUR helper to use
-```
-
-For example:
+Clone the fork to the stable path used by the Caelestia updater:
 
 ```sh
-git clone https://github.com/ChrisBlackoutDev/caelestia.git ~/.local/share/caelestia
-~/.local/share/caelestia/install.fish
+git clone git@github.com:ChrisBlackoutDev/caelestia.git ~/.local/share/caelestia
 ```
 
-### Manual installation
-
-Dependencies:
-
--   hyprland
--   xdg-desktop-portal-hyprland
--   xdg-desktop-portal-gtk
--   hyprpicker
--   wl-clipboard
--   cliphist
--   inotify-tools
--   app2unit
--   wireplumber
--   trash-cli
--   foot
--   fish
--   fastfetch
--   starship
--   btop
--   tty-clock
--   cmatrix
--   pipes.sh
--   cava
--   jq
--   eza
--   adw-gtk-theme
--   papirus-icon-theme
--   qtengine
--   ttf-jetbrains-mono-nerd
-
-Install all dependencies and follow the installation guides of the
-[shell](https://github.com/caelestia-dots/shell) and [cli](https://github.com/caelestia-dots/cli)
-to install them.
-
-> [!TIP]
-> If on Arch or an Arch-based distro, there is a meta package available [in this repository](PKGBUILD)
-> that pulls in all dependencies. It can be installed through the install script, makepkg/pacman, yay,
-> paru, or your preferred AUR helper.
-
-Then copy or symlink the `hypr`, `foot`, `fish`, `fastfetch`, `uwsm` and `btop` folders to the
-`$XDG_CONFIG_HOME` (usually `~/.config`) directory. e.g. `hypr -> ~/.config/hypr`.
-Copy `starship.toml` to `$XDG_CONFIG_HOME/starship.toml`.
-
-#### Installing Spicetify configs:
-
-Follow the Spicetify [installation instructions](https://spicetify.app/docs/advanced-usage/installation),
-copy or symlink the `spicetify` folder to `$XDG_CONFIG_HOME/spicetify` and run
+Install an AUR helper and the Caelestia CLI, then install from this checkout:
 
 ```sh
-spicetify config current_theme caelestia color_scheme caelestia custom_apps marketplace
-spicetify apply
+yay -S caelestia-cli
+CAELESTIA_DOTS="$HOME/.local/share/caelestia" caelestia install
 ```
 
-#### Installing VSCode/VSCodium configs:
+The default components provide Hyprland, Caelestia Shell, Firefox, Foot/Fish,
+Thunar, PipeWire, networking, Bluetooth, fonts, themes, clipboard tools, and
+the personal configurations in this fork. Optional application components can
+be selected by the installer, including Spotify, VSCodium, Equibop, Todoist,
+UWSM, Zed, Neovim, and Zen.
 
-Install VSCode or VSCodium, then copy or symlink `vscode/settings.json` and
-`vscode/keybindings.json` into the `$XDG_CONFIG_HOME/Code/User` (or `$XDG_CONFIG_HOME/VSCodium/User`
-if using VSCodium) folder. Then copy or symlink `vscode/flags.conf` to `$XDG_CONFIG_HOME/code-flags.conf`
-(or `$XDG_CONFIG_HOME/codium-flags.conf` if using VSCodium).
-
-Finally, install the extension VSIX from `vscode/caelestia-vscode-integration`.
-
-```sh
-# Use `codium` if using VSCodium
-code --install-extension vscode/caelestia-vscode-integration/caelestia-vscode-integration-*.vsix
-```
-
-#### Installing Zen Browser configs:
-
-Install Zen Browser, then copy or symlink `zen/userChrome.css` to the `chrome` folder in your
-profile of choice in `~/.zen`. e.g. `zen/userChrome.css -> ~/.zen/<profile>/chrome/userChrome.css`.
-
-Now install the native app by copying `zen/native_app/manifest.json` to
-`~/.mozilla/native-messaging-hosts/caelestiafox.json` and replacing the `{{ $lib }}` string in it
-with the absolute path of `~/.local/lib/caelestia` (this must be the absolute path, e.g.
-`/home/user/.local/lib/caelestia`). Then copy or symlink `zen/native_app/app.fish` to
-`~/.local/lib/caelestia/caelestiafox`.
-
-Finally, install the CaelestiaFox extension from [here](https://addons.mozilla.org/en-US/firefox/addon/caelestiafox).
+The dots installer manages copied files rather than the old repository
+symlinks, but keeping the checkout at `~/.local/share/caelestia` is recommended
+for predictable updates and local development.
 
 ## Updating
 
-Simply run `yay` to update the AUR packages, then `cd` into the repo directory and run `git pull` to update the configs.
+Run:
 
-## Usage
+```sh
+caelestia update
+```
 
-> [!NOTE]
-> These dots do not contain a login manager (for now), so you must install a
-> login manager yourself unless you want to log in from a TTY. I recommend
-> [`greetd`](https://sr.ht/~kennylevinsen/greetd) with
-> [`tuigreet`](https://github.com/apognu/tuigreet), however you can use
-> any login manager you want.
+Pull and reconcile this fork with `upstream/main` before accepting upstream
+dotfile updates that overlap personal behavior.
 
-There aren't really any usage instructions... these are a set of dotfiles.
+## Configuration
 
-Here's a list of useful keybinds though:
+Do not edit installed files in `~/.config/hypr` directly. Put machine-local
+overrides in:
 
--   `Super` - open launcher
--   `Super` + `#` - switch to workspace `#`
--   `Super` `Alt` + `#` - move window to workspace `#`
--   `Super` + `T` - open terminal (foot)
--   `Super` + `W` - open browser (Firefox)
--   `Super` + `C` - open IDE (vscodium)
--   `Super` + `S` - toggle special workspace or close current special workspace
--   `Ctrl` `Alt` + `Delete` - open session menu
--   `Ctrl` `Super` + `Space` - toggle media play state
--   `Ctrl` `Super` `Alt` + `R` - restart the shell
+- `~/.config/caelestia/hypr-vars.lua` for default apps, styling, and keybinds.
+- `~/.config/caelestia/hypr-user.lua` for monitor rules and custom Hyprland
+  configuration.
+- `~/.config/caelestia/shell.json` for shell behavior.
+- `~/.config/caelestia/cli.json` for special-workspace application behavior.
 
-### Terminal toys
+See [`hypr/variables.lua`](hypr/variables.lua) for all variable names. For
+example:
 
-The fish config includes command wrappers for `tty-clock`, `cmatrix`,
-`pipes.sh`, and `cava`:
+```lua
+return {
+  browser = "firefox",
+  editor = "codium",
+  windowBorderSize = 2,
+}
+```
 
--   `tty-clock` runs as `tty-clock -c -C 2`, so the clock is centered and uses
-    ANSI green.
--   `cmatrix` runs a Caelestia-themed renderer with a transparent terminal
-    background and truecolour rain gradients from the active palette. Use
-    `cmatrix --stock` to run `/usr/bin/cmatrix` instead.
--   `pipes.sh` remaps ANSI pipe colours to the current Caelestia palette while
-    it runs and restores `~/.local/state/caelestia/sequences.txt` on exit. This
-    counteracts the upstream script's `tput reset` cleanup, which can otherwise
-    leave foot's terminal colours/transparency looking wrong.
--   `cava` runs with a temporary config generated from the live Caelestia
-    palette, using the normal `~/.config/cava/config` as the base settings.
+## Main keybinds
 
-The `tty-clock` wrapper reads `~/.local/state/caelestia/scheme.json` and
-temporarily remaps ANSI green to the current Caelestia `primary` colour. When
-the command exits, it prints `~/.local/state/caelestia/sequences.txt` to restore
-the generated terminal palette. The `cmatrix` renderer reads the same scheme
-file directly and only emits foreground colour sequences, preserving the
-terminal's transparent background. The `pipes.sh` and `cava` wrappers also use
-the same scheme file at launch, so wallpaper changes are picked up in new runs.
+- `Super`: launcher
+- `Super + 1` through `0`: workspaces 1 through 10
+- `Super + Alt + 1` through `0`: move the active window
+- `Super + T`: Foot terminal
+- `Super + W`: Firefox
+- `Super + C`: VSCodium
+- `Super + E`: Thunar
+- `Super + Alt + Space`: tile/float all windows on the current workspace
+- `Super + S`: special workspace
+- `Super + M`: music workspace
+- `Super + D`: communication workspace
+- `Super + R`: todo workspace
+- `Super + V`: clipboard history
+- `Super + Period`: emoji picker
+- `Super + L`: lock
+- `Ctrl + Alt + Delete`: session menu
+- `Ctrl + Super + Alt + R`: restart Caelestia Shell
+
+The full default keybind list is maintained in the
+[upstream README](https://github.com/caelestia-dots/caelestia#default-keybinds).
+
+## Terminal toys
+
+The Fish configuration wraps four terminal tools so new launches follow the
+active Caelestia wallpaper palette:
+
+- `tty-clock` starts centered and maps ANSI green to the current primary
+  colour.
+- `cmatrix` uses a transparent true-colour gradient renderer. Run
+  `cmatrix --stock` for the upstream binary.
+- `pipes.sh` temporarily remaps its ANSI colours and restores Foot's palette on
+  exit.
+- `cava` generates a fresh palette-derived gradient for every launch.
+
+The wrappers read `~/.local/state/caelestia/scheme.json` and restore terminal
+sequences from `~/.local/state/caelestia/sequences.txt` when appropriate.
+
+## Login manager
+
+The dots do not install a display manager. A suitable Arch setup is
+[`greetd`](https://sr.ht/~kennylevinsen/greetd) with
+[`tuigreet`](https://github.com/apognu/tuigreet), launching the Hyprland UWSM
+desktop entry.
+
+Upstream projects: [dots](https://github.com/caelestia-dots/caelestia),
+[shell](https://github.com/caelestia-dots/shell), and
+[CLI](https://github.com/caelestia-dots/cli).

@@ -23,6 +23,7 @@ ShellRoot {
     property string status: qsTr("Ready")
     property string activeModel: Quickshell.env("OPENROUTER_MODEL") || "qwen/qwen-2.5-coder-32b-instruct"
     property string customInstructions: "You are a concise AI helper embedded in a Hyprland desktop panel. Chat only. Do not claim to run commands, edit files, or inspect the system."
+    property string helperDir: Quickshell.env("HOME") + "/.local/bin"
     property int maxContextMessages: 18
     property bool busy: false
     property bool settingsOpen: false
@@ -69,7 +70,7 @@ ShellRoot {
         settingsOpen = true;
         settingsStatus = qsTr("Loading settings");
         settingsProc.action = "load";
-        settingsProc.exec(["/home/kensa/.local/bin/caelestia-ai-settings"]);
+        settingsProc.exec([helperDir + "/caelestia-ai-settings"]);
     }
 
     function closeSettings(): void {
@@ -82,7 +83,7 @@ ShellRoot {
     function saveSettings(): void {
         settingsStatus = qsTr("Saving settings");
         settingsProc.action = "save";
-        settingsProc.exec(["/home/kensa/.local/bin/caelestia-ai-settings"]);
+        settingsProc.exec([helperDir + "/caelestia-ai-settings"]);
     }
 
     function applySettings(settings: var): void {
@@ -182,7 +183,7 @@ ShellRoot {
     function requestMessages(): var {
         const out = [{
             role: "system",
-            content: "You are a local AI helper panel running inside the user's Hyprland/Caelestia desktop. The local user is kensa, HOME is /home/kensa, and the default working directory is /home/kensa. You have access to a small local tool bridge for shell commands, text file reads, directory listings, screenshots, web search, image search, and read-only hyprctl queries. Use tools when they directly help answer the user, and prefer one focused tool call over many broad ones. Destructive commands, package operations, sudo, service changes, and write-heavy commands require an explicit user approval card before they run. If approval is required, say what the command will do and wait for the user to approve it in the panel. Screenshots and image-search results are rendered inline by the panel. Do not emit XML, DSML, raw function-call markup, or hidden control syntax; the panel will render tool results for you.\n\nUser instructions:\n" + customInstructions
+            content: "You are a chat-only AI helper embedded in the user's Hyprland/Caelestia desktop. You cannot inspect the machine, run commands, modify files, or use local tools. Be clear when a request needs capabilities you do not have. Do not emit XML, DSML, function-call markup, or hidden control syntax.\n\nUser instructions:\n" + customInstructions
         }];
 
         const start = Math.max(0, messages.count - maxContextMessages);
@@ -238,7 +239,7 @@ ShellRoot {
         approvalMessageIndex = typeof messageIndex === "number" ? messageIndex : -1;
         status = qsTr("Running approved command");
         approvedTimeoutTimer.restart();
-        approvedProc.exec(["/home/kensa/.local/bin/caelestia-ai-agent", "--approved-shell-command", trimmed]);
+        approvedProc.exec([helperDir + "/caelestia-ai-agent", "--approved-shell-command", trimmed]);
     }
 
     function rejectCommand(command: string, messageIndex: var): void {
@@ -367,7 +368,7 @@ ShellRoot {
         busy = true;
         status = qsTr("Thinking");
         requestTimeoutTimer.restart();
-        requestProc.exec(["/home/kensa/.local/bin/caelestia-ai-agent"]);
+        requestProc.exec([helperDir + "/caelestia-ai-agent"]);
         return true;
     }
 
@@ -723,7 +724,7 @@ ShellRoot {
 
     Component.onCompleted: {
         settingsProc.action = "load";
-        settingsProc.exec(["/home/kensa/.local/bin/caelestia-ai-settings"]);
+        settingsProc.exec([helperDir + "/caelestia-ai-settings"]);
     }
 
     Variants {
@@ -1505,7 +1506,7 @@ ShellRoot {
 
                                 StyledText {
                                     Layout.fillWidth: true
-                                    text: qsTr("Risky shell commands require explicit approval in chat. Screenshots and image search results render inline.")
+                                    text: qsTr("This helper is chat-only and cannot run commands or inspect local files.")
                                     font: Tokens.font.body.small
                                     color: Colours.palette.m3outline
                                     wrapMode: Text.Wrap

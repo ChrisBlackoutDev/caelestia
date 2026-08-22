@@ -3,6 +3,7 @@ Type=Application
 Name=Cursor
 Comment=AI code editor
 Exec=/home/kensa/Applications/cursor/cursor.AppImage %U
+TryExec=/home/kensa/Applications/cursor/cursor.AppImage
 Icon=cursor
 Terminal=false
 Categories=Development;IDE;

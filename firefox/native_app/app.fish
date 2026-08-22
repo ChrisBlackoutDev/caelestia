@@ -1,11 +1,9 @@
 #!/usr/bin/env fish
 
 function message -a msg
-    # The message length as 4 hex bytes
+    # Native messaging uses a four-byte little-endian byte length prefix.
     set -l x (printf '%08X' (printf '%s' "$msg" | wc -c | string trim))
-    # Write each of the 4 bytes
     printf '%b' "\\x$(string sub -s 7 -l 2 $x)\\x$(string sub -s 5 -l 2 $x)\\x$(string sub -s 3 -l 2 $x)\\x$(string sub -s 1 -l 2 $x)"
-    # Write the message itself
     printf '%s' "$msg"
 end
 

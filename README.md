@@ -37,8 +37,15 @@ Install an AUR helper and the Caelestia CLI, then install from this checkout:
 
 ```sh
 yay -S caelestia-cli
-CAELESTIA_DOTS="$HOME/.local/share/caelestia" caelestia install
+mkdir -p ~/.config/caelestia
+printf '%s\n' '{"dots":{"url":"/home/kensa/.local/share/caelestia","branch":"main"}}' \
+  > ~/.config/caelestia/cli.json
+caelestia install
 ```
+
+Replace `/home/kensa` if the checkout belongs to a different user. Using the
+local checkout keeps unpushed development commits available to the installer;
+use the fork's SSH URL instead when all desired commits have been pushed.
 
 The default components provide Hyprland, Caelestia Shell, Firefox, Foot/Fish,
 Thunar, PipeWire, networking, Bluetooth, fonts, themes, clipboard tools, and
@@ -126,8 +133,8 @@ sequences from `~/.local/state/caelestia/sequences.txt` when appropriate.
 
 The dots do not install a display manager. A suitable Arch setup is
 [`greetd`](https://sr.ht/~kennylevinsen/greetd) with
-[`tuigreet`](https://github.com/apognu/tuigreet), launching the Hyprland UWSM
-desktop entry.
+[`tuigreet`](https://github.com/apognu/tuigreet), launching
+`start-hyprland`. UWSM remains available as an optional component.
 
 Upstream projects: [dots](https://github.com/caelestia-dots/caelestia),
 [shell](https://github.com/caelestia-dots/shell), and

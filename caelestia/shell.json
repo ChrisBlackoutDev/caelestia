@@ -22,7 +22,7 @@
                 {
                     "idleAction": [
                         "systemctl",
-                        "suspend-then-hibernate"
+                        "suspend"
                     ],
                     "timeout": 3600
                 }

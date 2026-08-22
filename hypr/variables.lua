@@ -52,7 +52,7 @@ return {
     volumeMax                  = 100,
     cursorTheme                = "sweet-cursors",
     cursorSize                 = 24,
-    sleepGestureCmd            = "systemctl suspend-then-hibernate",
+    sleepGestureCmd            = "systemctl suspend",
 
     ------------------
     ---- KEYBINDS ----

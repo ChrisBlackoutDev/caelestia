@@ -1,9 +1,9 @@
 packages = ["caelestia-shell", "caelestia-cli"]
 post_install = [
     "test -f ${XDG_STATE_HOME:-$HOME/.local/state}/caelestia/scheme.json || caelestia scheme set -n caelestia",
-    "caelestia shell -d >/dev/null",
+    "test -z \"$HYPRLAND_INSTANCE_SIGNATURE\" || caelestia shell -d >/dev/null",
 ]
-post_update = ["caelestia shell -k; sleep 1; caelestia shell -d >/dev/null"]
+post_update = ["test -z \"$HYPRLAND_INSTANCE_SIGNATURE\" || { caelestia shell -k; sleep 1; caelestia shell -d >/dev/null; }"]
 
 # --- Core components ---
 
@@ -16,8 +16,8 @@ packages = [
     "xdg-desktop-portal-gtk",
     "ttf-jetbrains-mono-nerd",
 ]
-post_install = ["hyprctl reload >/dev/null"]
-post_update = ["hyprctl reload >/dev/null"]
+post_install = ["test -z \"$HYPRLAND_INSTANCE_SIGNATURE\" || hyprctl reload >/dev/null"]
+post_update = ["test -z \"$HYPRLAND_INSTANCE_SIGNATURE\" || hyprctl reload >/dev/null"]
 [[components.entries]]
 src = "hypr"
 dest = "$XDG_CONFIG_HOME/hypr"

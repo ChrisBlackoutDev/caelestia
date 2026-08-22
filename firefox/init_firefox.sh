@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-profiles_ini="${HOME}/.mozilla/firefox/profiles.ini"
+profiles_root="${XDG_CONFIG_HOME:-${HOME}/.config}/mozilla/firefox"
+profiles_ini="${profiles_root}/profiles.ini"
 
 # Profiles already exist
 [[ -f "$profiles_ini" ]] && exit 0

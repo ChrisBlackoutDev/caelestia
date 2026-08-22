@@ -112,10 +112,10 @@ packages = ["firefox", "local:packages/caelestia-firefox-theme"]
 post_package = ["bash $CAELESTIA_DOTS/firefox/init_firefox.sh"]
 [[components.entries]]
 src = "firefox/userChrome.css"
-dest = "$HOME/.mozilla/firefox/*.default*/chrome/userChrome.css"
+dest = "$XDG_CONFIG_HOME/mozilla/firefox/*.default*/chrome/userChrome.css"
 [[components.entries]]
 src = "firefox/user.js"
-dest = "$HOME/.mozilla/firefox/*.default*/user.js"
+dest = "$XDG_CONFIG_HOME/mozilla/firefox/*.default*/user.js"
 
 [[components]]
 name = "gtk"
@@ -225,11 +225,8 @@ dest = "$XDG_DATA_HOME/applications/OrcaSlicer.desktop"
 
 [[components]]
 name = "spotify"
-packages = ["spotify", "spicetify-cli", "spicetify-marketplace-bin"]
-post_install = [
-    "spicetify config current_theme caelestia color_scheme caelestia custom_apps marketplace",
-    "spicetify apply",
-]
+packages = ["spotify", "spicetify-cli", "spicetify-marketplace-bin", "acl"]
+post_install = ["bash $CAELESTIA_DOTS/spicetify/init_spicetify.sh"]
 [[components.entries]]
 src = "spicetify"
 dest = "$XDG_CONFIG_HOME/spicetify"

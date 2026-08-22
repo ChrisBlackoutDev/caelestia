@@ -11,3 +11,8 @@
 /fish/conf.d/
 
 .SRCINFO
+
+# Local Arch package build outputs
+/packages/*/pkg/
+/packages/*/src/
+/packages/*/*.pkg.tar.zst

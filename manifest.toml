@@ -120,7 +120,7 @@ dest = "$HOME/.mozilla/firefox/*.default*/user.js"
 [[components]]
 name = "gtk"
 default = true
-packages = ["adw-gtk-theme", "papirus-icon-theme", "papirus-folders", "sweet-cursor-theme"]
+packages = ["adw-gtk-theme", "papirus-icon-theme", "papirus-folders", "sweet-cursors-git"]
 
 [[components]]
 name = "qt"

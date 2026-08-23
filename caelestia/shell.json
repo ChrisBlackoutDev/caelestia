@@ -12,6 +12,7 @@
             "timeouts": [
                 {
                     "idleAction": "lock",
+                    "inhibitWhenCharging": true,
                     "timeout": 1800
                 },
                 {
@@ -24,6 +25,7 @@
                         "systemctl",
                         "suspend-then-hibernate"
                     ],
+                    "inhibitWhenCharging": true,
                     "timeout": 3600
                 }
             ]

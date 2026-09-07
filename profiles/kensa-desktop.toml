@@ -162,8 +162,6 @@ packages = [
     "noto-fonts-emoji",
     "ttf-dejavu",
     "ttf-liberation",
-    "intel-media-driver",
-    "intel-gpu-tools",
     "libva-utils",
 ]
 

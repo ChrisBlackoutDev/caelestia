@@ -53,7 +53,7 @@ end
 -- Default monitor conf
 hl.monitor({
     output   = "",
-    mode     = "preferred",
+    mode     = "highrr",
     position = "auto",
     scale    = 1,
 })
@@ -74,3 +74,12 @@ require("hyprland.keybinds")
 -- User configs
 maybe_create(home .. "/.config/caelestia/hypr-user.lua")
 require("hypr-user")
+maybe_create(home .. "/.config/caelestia/hypr-monitor-generated.lua", "-- Managed by the Caelestia display service.\n")
+local generated_monitor_config = home .. "/.config/caelestia/hypr-monitor-generated.lua"
+local generated_monitor_chunk, generated_monitor_error = loadfile(generated_monitor_config)
+if generated_monitor_chunk then
+    local loaded, load_error = pcall(generated_monitor_chunk)
+    if not loaded then print("Failed to apply generated monitor config: " .. tostring(load_error)) end
+else
+    print("Failed to load generated monitor config: " .. tostring(generated_monitor_error))
+end

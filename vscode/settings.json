@@ -26,9 +26,7 @@
     "workbench.iconTheme": "catppuccin-mocha",
     "git.enableSmartCommit": true,
     "codeium.enableConfig": {
-        "*": true,
-        "fish": true,
-        "qml": true
+        "*": false
     },
     "[c]": {
         "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
@@ -37,7 +35,7 @@
         "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
     },
     "doxdocgen.generic.boolReturnsTrueFalse": false,
-    "terminal.integrated.enableMultiLinePasteWarning": "never",
+    "terminal.integrated.enableMultiLinePasteWarning": "auto",
     "qt-qml.qmlls.additionalImportPaths": ["/usr/lib/qt6/qml"],
     "[python]": {
         "editor.defaultFormatter": "charliermarsh.ruff"

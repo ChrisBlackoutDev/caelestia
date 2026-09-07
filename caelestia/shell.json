@@ -1,0 +1,34 @@
+{
+    "dashboard": {
+        "mediaUpdateInterval": 1500,
+        "performance": {
+            "showGpu": false,
+            "showNetwork": false
+        },
+        "resourceUpdateInterval": 3000
+    },
+    "general": {
+        "idle": {
+            "timeouts": [
+                {
+                    "idleAction": "lock",
+                    "timeout": 1800
+                },
+                {
+                    "idleAction": "dpms off",
+                    "returnAction": "dpms on",
+                    "timeout": 2100
+                },
+                {
+                    "idleAction": [
+                        "suspendThenHibernate"
+                    ],
+                    "timeout": 3600
+                }
+            ]
+        }
+    },
+    "nexus": {
+        "networkRescanInterval": 60000
+    }
+}

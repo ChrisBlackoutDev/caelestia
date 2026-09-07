@@ -1,0 +1,20 @@
+pkgbase = sddm-pixel-sakura
+	pkgdesc = Package-managed Pixel Sakura wrapper for sddm-astronaut-theme
+	pkgver = 1.0.0
+	pkgrel = 1
+	url = https://github.com/Keyitdev/sddm-astronaut-theme
+	arch = any
+	license = GPL-3.0-or-later
+	depends = sddm
+	depends = sddm-astronaut-theme
+	depends = qt6-virtualkeyboard
+	backup = etc/sddm.conf.d/20-caelestia-theme.conf
+	backup = etc/sddm.conf.d/20-caelestia-virtualkbd.conf
+	source = metadata.desktop
+	source = theme.conf
+	source = virtualkbd.conf
+	sha256sums = b40fb7244c82965c92b36ca0a66c986265224224b49371d0e737456fa2860706
+	sha256sums = 4c500264d30d4e6a03587f12c0ffcbff968e12717ca4265eb6ab984c2663e949
+	sha256sums = 05a48d57f2e39434c9d06c087559676e3604005eddd46bed1b2e00dec8b933b8
+
+pkgname = sddm-pixel-sakura

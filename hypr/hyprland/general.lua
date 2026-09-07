@@ -4,7 +4,7 @@ hl.config({
     general = {
         layout          = "dwindle",
 
-        allow_tearing   = false, -- Allows `immediate` window rule to work
+        allow_tearing   = true, -- Allows `immediate` window rule to work
 
         gaps_workspaces = vars.workspaceGaps,
         gaps_in         = vars.windowGapsIn,

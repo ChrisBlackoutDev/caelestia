@@ -29,6 +29,12 @@ paru -S caelestia-cli
 caelestia install
 ```
 
+### ChrisBlackoutDev personal profile
+
+The `codex/upstream-refresh-2026-09-07` branch carries the workstation profile while retaining the upstream manifest and documentation structure. Its bootstrap is intentionally staged: it never performs an OS upgrade, implicit recursive package cleanup, broad service enablement, or implicit group membership change. Package-provider replacements remain explicit gated transactions.
+
+Start with the [fresh Arch guide](docs/fresh-arch-install.md) or the [upstream synchronization guide](docs/upstream-sync.md). Package provenance and validation commands are documented in [package sources](docs/package-sources.md) and [validation](docs/validation.md). The personal profile uses `yay`, pins the shell fork to an exact commit, keeps Spotify disabled, and does not install an AI shell panel.
+
 ### Manual installation
 
 Clone this repo, then go through [the manifest](/manifest.toml) and install all packages from the

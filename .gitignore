@@ -11,3 +11,10 @@
 /fish/conf.d/
 
 .SRCINFO
+!bootstrap/pkgbuilds/caelestia-shell-fork/.SRCINFO
+!bootstrap/pkgbuilds/sddm-pixel-sakura/.SRCINFO
+
+bootstrap/pkgbuilds/*/src/
+bootstrap/pkgbuilds/*/pkg/
+bootstrap/pkgbuilds/*/*.pkg.tar.*
+bootstrap/pkgbuilds/caelestia-shell-fork/caelestia-shell-fork/

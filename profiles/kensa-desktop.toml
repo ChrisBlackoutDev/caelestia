@@ -1,0 +1,236 @@
+[profile]
+name = "kensa-desktop"
+description = "ChrisBlackoutDev personal Arch/Hyprland/Caelestia desktop profile"
+user = "kensa"
+
+[caelestia]
+dots_url = "https://github.com/ChrisBlackoutDev/caelestia.git"
+dots_branch = "codex/upstream-refresh-2026-09-07"
+aur_helper = "yay"
+core_components = [
+    "hypr",
+    "fish",
+    "foot",
+    "fastfetch",
+    "btop",
+    "micro",
+    "thunar",
+    "caelestia",
+    "app-launchers",
+    "starship",
+    "firefox",
+    "gtk",
+    "qt",
+    "auth",
+    "network",
+    "bluetooth",
+    "pipewire",
+    "clipboard",
+    "fonts",
+    "tools",
+    "uwsm",
+]
+enable_components = [
+    "hypr",
+    "fish",
+    "foot",
+    "fastfetch",
+    "btop",
+    "micro",
+    "thunar",
+    "caelestia",
+    "app-launchers",
+    "terminal-toys",
+    "starship",
+    "firefox",
+    "gtk",
+    "qt",
+    "auth",
+    "network",
+    "bluetooth",
+    "pipewire",
+    "clipboard",
+    "fonts",
+    "tools",
+    "vscode",
+    "todoist",
+    "uwsm",
+    "zen",
+    "nvim",
+    "sddm-personal",
+]
+
+[packages.official.core]
+purpose = "Core build and migration prerequisites"
+packages = [
+    "base-devel",
+    "git",
+    "cmake",
+    "ninja",
+    "qt6-shadertools",
+    "hyprlock",
+    "ttf-material-symbols-variable",
+    "ttf-cascadia-code-nerd",
+]
+
+[packages.official.browsers]
+purpose = "Web browsers"
+packages = ["firefox", "chromium"]
+
+[packages.official.productivity]
+purpose = "Office, notes, documents, and media"
+packages = [
+    "libreoffice-fresh",
+    "obsidian",
+    "mpv",
+    "qbittorrent",
+    "gwenview",
+    "kolourpaint",
+    "krita",
+    "zathura",
+    "zathura-pdf-mupdf",
+    "xournalpp",
+    "tesseract-data-eng",
+]
+
+[packages.official.desktop]
+purpose = "Desktop services, file managers, peripherals, and session plumbing"
+packages = [
+    "cups",
+    "cups-pk-helper",
+    "system-config-printer",
+    "bluez",
+    "bluez-utils",
+    "qps",
+    "nemo",
+    "gammastep",
+    "hyprlock",
+    "pipewire",
+    "pipewire-alsa",
+    "pipewire-jack",
+    "pipewire-pulse",
+    "wireplumber",
+    "wpa_supplicant",
+    "openssh",
+    "networkmanager",
+    "libnm",
+    "sddm",
+    "qt6-5compat",
+    "qt6-declarative",
+    "qt6-multimedia-ffmpeg",
+    "qt6-svg",
+    "qt6-virtualkeyboard",
+    "power-profiles-daemon",
+]
+
+[packages.official.games]
+purpose = "Existing game platform retained intentionally"
+packages = ["steam"]
+
+[packages.official.development]
+purpose = "Developer tools"
+packages = [
+    "docker",
+    "docker-buildx",
+    "docker-compose",
+    "github-cli",
+    "neovim",
+    "fd",
+    "ripgrep",
+    "rsync",
+    "unzip",
+    "unrar",
+    "zip",
+    "7zip",
+    "yt-dlp",
+    "nodejs",
+    "npm",
+    "tree-sitter-cli",
+    "tinyxxd",
+]
+
+[packages.official.system]
+purpose = "System health, networking, fonts, graphics, and boot defaults"
+packages = [
+    "tailscale",
+    "mullvad-vpn",
+    "mullvad-vpn-daemon",
+    "smartmontools",
+    "zram-generator",
+    "noto-fonts",
+    "noto-fonts-cjk",
+    "noto-fonts-emoji",
+    "ttf-dejavu",
+    "ttf-liberation",
+    "intel-media-driver",
+    "intel-gpu-tools",
+    "libva-utils",
+]
+
+[packages.official.thumbnails]
+purpose = "File manager thumbnail generation"
+packages = ["tumbler", "ffmpegthumbnailer", "poppler-glib", "libgsf", "webp-pixbuf-loader"]
+
+[packages.official.terminal_toys]
+purpose = "Runtime dependencies for the optional terminal-toys component"
+packages = ["cmatrix", "cava", "python", "jq"]
+
+[packages.aur.editors]
+purpose = "GUI editors and browsers from AUR"
+packages = ["visual-studio-code-bin", "cursor-appimage", "zen-browser-bin"]
+
+[packages.aur.apps]
+purpose = "Desktop apps from AUR"
+packages = [
+    "zoom",
+    "orca-slicer-bin",
+    "todoist-appimage",
+    "github-desktop-bin",
+]
+
+[packages.aur.desktop]
+purpose = "Desktop controls that are not in official repositories"
+packages = ["pwvucontrol"]
+
+[packages.aur.shell]
+purpose = "Caelestia CLI, runtime dependencies, and fonts"
+packages = [
+    "caelestia-cli",
+    "quickshell-git",
+    "qt6-m3shapes-git",
+    "ttf-rubik-vf",
+]
+
+[packages.aur.display_manager]
+purpose = "Package-owned SDDM theme assets"
+packages = ["sddm-astronaut-theme"]
+
+[packages.aur.terminal_toys]
+purpose = "AUR commands used by the optional terminal-toys component"
+packages = ["tty-clock", "pipes.sh"]
+
+[services]
+requested = ["NetworkManager", "bluetooth", "cups", "docker", "tailscaled", "mullvad-daemon", "sddm"]
+
+[display_manager.sddm]
+theme = "pixel-sakura"
+source_theme = "sddm-astronaut-theme"
+config_file = "Themes/pixel_sakura.conf"
+input_method = "qtvirtualkeyboard"
+
+[groups]
+user = "kensa"
+requested = ["docker", "uucp"]
+
+[manual]
+items = [
+    "Authenticate Mullvad and Tailscale after install; do not store credentials in the repo.",
+    "Verify printers and Bluetooth devices with local hardware present.",
+    "Approve Docker group membership separately, then log out and back in before testing it.",
+    "Grant uucp only if connected serial or flight-controller hardware proves it is required.",
+    "Install and authenticate CaelestiaFox manually after its current source and permissions are reviewed.",
+    "Keep the existing Cursor AppImage as rollback until the managed cursor command is verified.",
+    "Keep multilib enabled while the retained Steam package is installed.",
+    "Archive any unowned sddm-astronaut-theme directory before installing the package-owned replacement.",
+    "Review and install betaflight-configurator-bin separately only if current flight-controller hardware still requires it; its AUR package was out of date during this refresh.",
+]

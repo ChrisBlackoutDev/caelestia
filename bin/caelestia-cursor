@@ -1,0 +1,13 @@
+#!/bin/sh
+
+if command -v cursor >/dev/null 2>&1; then
+    exec cursor "$@"
+fi
+
+fallback="$HOME/Applications/cursor/cursor.AppImage"
+if [ -x "$fallback" ]; then
+    exec "$fallback" "$@"
+fi
+
+printf '%s\n' 'Cursor is not installed and the rollback AppImage is unavailable.' >&2
+exit 127

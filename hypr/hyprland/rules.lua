@@ -98,6 +98,7 @@ tagged_rule(float_60_70_tag, {
 }, "title")
 tagged_rule(float_60_70_tag, {
     { title = "(Save|Export) Image", class = "gimp" }, -- GIMP export/save
+    { title = "nmtui",               class = "foot" }, -- NetworkManager TUI
 })
 tagged_rule(float_60_70_tag, {
     "org.pulseaudio.pavucontrol|com.saivert.pwvucontrol", -- Audio control
@@ -135,19 +136,15 @@ tagged_rule(xwl_popup_tag, {
 tagged_rule(system_monitor_tag, { "btop" }, "class")
 tagged_rule(music_player_tag, {
     "feishin|Supersonic|Plexamp",                                  -- Self hosted
-    "Spotify",                                                     -- Spotify
     "Cider",                                                       -- Apple music
     "com.github.th-ch.youtube-music|com-maxrave-simpmusic-MainKt", -- YouTube music
 }, "class")
-tagged_rule(music_player_tag, {
-    "Spotify|Spotify Free" -- Spotify wayland, it has no class for some reason
-}, "initial_title")
 tagged_rule(communication_app_tag, {
     "discord|equibop|vesktop", -- Discord clients
     "whatsapp"                 -- Whatsapp
 }, "class")
 tagged_rule(todo_app_tag, {
-    "todoist" -- Todoist
+    "Todoist|todoist" -- Todoist
 }, "class")
 
 
@@ -156,6 +153,7 @@ tagged_rule(todo_app_tag, {
 -----------------------
 
 -- Steam
+hl.window_rule({ match = { class = "steam" }, rounding = math.min(10, vars.windowRounding) })
 tagged_rule(float_tag, { { class = "steam", title = "Friends List" } })
 tagged_rule(xwl_popup_tag, { { class = "steam", title = "" } })
 

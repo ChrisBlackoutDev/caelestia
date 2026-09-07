@@ -1,9 +1,9 @@
-packages = ["caelestia-shell", "caelestia-cli"]
+packages = ["caelestia-cli", "local:bootstrap/pkgbuilds/caelestia-shell-fork"]
 post_install = [
     "test -f ${XDG_STATE_HOME:-$HOME/.local/state}/caelestia/scheme.json || caelestia scheme set -n caelestia",
-    "caelestia shell -d >/dev/null",
+    "test -z \"$HYPRLAND_INSTANCE_SIGNATURE\" || caelestia shell -d >/dev/null",
 ]
-post_update = ["caelestia shell -k; sleep 1; caelestia shell -d >/dev/null"]
+post_update = ["test -z \"$HYPRLAND_INSTANCE_SIGNATURE\" || { caelestia shell -k; sleep 1; caelestia shell -d >/dev/null; }"]
 
 # --- Core components ---
 
@@ -12,12 +12,13 @@ name = "hypr"
 default = true
 packages = [
     "hyprland",
+    "hyprlock",
     "xdg-desktop-portal-hyprland",
     "xdg-desktop-portal-gtk",
     "ttf-jetbrains-mono-nerd",
 ]
-post_install = ["hyprctl reload >/dev/null"]
-post_update = ["hyprctl reload >/dev/null"]
+post_install = ["test -z \"$HYPRLAND_INSTANCE_SIGNATURE\" || hyprctl reload >/dev/null"]
+post_update = ["test -z \"$HYPRLAND_INSTANCE_SIGNATURE\" || hyprctl reload >/dev/null"]
 [[components.entries]]
 src = "hypr"
 dest = "$XDG_CONFIG_HOME/hypr"
@@ -71,10 +72,48 @@ dest = "$XDG_CONFIG_HOME/micro"
 [[components]]
 name = "thunar"
 default = true
-packages = ["thunar"]
+packages = ["thunar", "tumbler", "ffmpegthumbnailer", "poppler-glib", "libgsf", "webp-pixbuf-loader"]
 [[components.entries]]
-src = "thunar"
-dest = "$XDG_CONFIG_HOME/Thunar"
+src = "thunar/uca.xml"
+dest = "$XDG_CONFIG_HOME/Thunar/uca.xml"
+[[components.entries]]
+src = "thunar/thunar.xml"
+dest = "$XDG_CONFIG_HOME/xfce4/xfconf/xfce-perchannel-xml/thunar.xml"
+[[components.entries]]
+src = "thunar/thunar-volman.xml"
+dest = "$XDG_CONFIG_HOME/xfce4/xfconf/xfce-perchannel-xml/thunar-volman.xml"
+
+[[components]]
+name = "caelestia"
+default = true
+[[components.entries]]
+src = "caelestia/shell.json"
+dest = "$XDG_CONFIG_HOME/caelestia/shell.json"
+[[components.entries]]
+src = "caelestia/hypr-vars.lua"
+dest = "$XDG_CONFIG_HOME/caelestia/hypr-vars.lua"
+[[components.entries]]
+src = "caelestia/hypr-user.lua"
+dest = "$XDG_CONFIG_HOME/caelestia/hypr-user.lua"
+
+[[components]]
+name = "app-launchers"
+default = true
+[[components.entries]]
+src = "applications"
+dest = "$XDG_DATA_HOME/applications"
+[[components.entries]]
+src = "bin/caelestia-cursor"
+dest = "$HOME/.local/bin/caelestia-cursor"
+
+[[components]]
+name = "terminal-toys"
+default = false
+packages = ["tty-clock", "cmatrix", "pipes.sh", "cava", "python", "jq"]
+
+[[components]]
+name = "sddm-personal"
+packages = ["local:bootstrap/pkgbuilds/sddm-pixel-sakura"]
 
 [[components]]
 name = "starship"
@@ -120,7 +159,7 @@ packages = ["gnome-keyring", "polkit-gnome"]
 [[components]]
 name = "network"
 default = true
-packages = ["networkmanager"]
+packages = ["networkmanager", "libnm"]
 
 [[components]]
 name = "bluetooth"
@@ -199,7 +238,7 @@ dest = "$XDG_CONFIG_HOME/codium-flags.conf"
 
 [[components]]
 name = "vscode"
-packages = ["code"]
+packages = ["visual-studio-code-bin"]
 post_install = [
     "code --install-extension $CAELESTIA_DOTS/vscode/caelestia-vscode-integration/caelestia-vscode-integration-*.vsix",
 ]

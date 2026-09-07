@@ -1,0 +1,32 @@
+# Maintainer: ChrisBlackoutDev
+
+pkgname=sddm-pixel-sakura
+pkgver=1.0.0
+pkgrel=1
+pkgdesc='Package-managed Pixel Sakura wrapper for sddm-astronaut-theme'
+arch=('any')
+url='https://github.com/Keyitdev/sddm-astronaut-theme'
+license=('GPL-3.0-or-later')
+depends=('sddm' 'sddm-astronaut-theme' 'qt6-virtualkeyboard')
+backup=(
+    'etc/sddm.conf.d/20-caelestia-theme.conf'
+    'etc/sddm.conf.d/20-caelestia-virtualkbd.conf'
+)
+source=('metadata.desktop' 'theme.conf' 'virtualkbd.conf')
+sha256sums=(
+    'b40fb7244c82965c92b36ca0a66c986265224224b49371d0e737456fa2860706'
+    '4c500264d30d4e6a03587f12c0ffcbff968e12717ca4265eb6ab984c2663e949'
+    '05a48d57f2e39434c9d06c087559676e3604005eddd46bed1b2e00dec8b933b8'
+)
+
+package() {
+    local theme_dir="$pkgdir/usr/share/sddm/themes/pixel-sakura"
+
+    install -dm755 "$theme_dir"
+    for entry in Assets Backgrounds Components Fonts Main.qml Previews Themes; do
+        ln -s "../sddm-astronaut-theme/$entry" "$theme_dir/$entry"
+    done
+    install -Dm644 metadata.desktop "$theme_dir/metadata.desktop"
+    install -Dm644 theme.conf "$pkgdir/etc/sddm.conf.d/20-caelestia-theme.conf"
+    install -Dm644 virtualkbd.conf "$pkgdir/etc/sddm.conf.d/20-caelestia-virtualkbd.conf"
+}

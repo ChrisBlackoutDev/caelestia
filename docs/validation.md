@@ -12,6 +12,8 @@ done
 fish bootstrap/tests/legacy-links.fish
 fish bootstrap/tests/cutover-config.fish
 fish bootstrap/tests/system-preflight.fish
+bash -n firefox/init_firefox.sh firefox/tests/init-firefox.sh
+bash firefox/tests/init-firefox.sh
 python bootstrap/tests/apply-prebuilt.py
 python -m py_compile bootstrap/apply-prebuilt.py bootstrap/tests/apply-prebuilt.py
 python -c 'import json; json.load(open("caelestia/shell.json")); json.load(open("vscode/settings.json"))'

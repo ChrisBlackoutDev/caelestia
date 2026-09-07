@@ -4,6 +4,7 @@ set -l root (realpath (status dirname)/..)
 source "$root/bootstrap/lib/profile.fish"
 source "$root/bootstrap/lib/legacy.fish"
 source "$root/bootstrap/lib/cutover.fish"
+source "$root/bootstrap/lib/system.fish"
 
 set -l profile kensa-desktop
 set -l stage
@@ -14,6 +15,7 @@ set -l approve_aur 0
 set -l migrate_legacy_links 0
 set -l legacy_link_journal
 set -l sync_profile_components 0
+set -l deploy_prebuilt 0
 set -l package_groups
 set -l enabled_services
 set -l approved_groups
@@ -22,8 +24,9 @@ function usage
     echo "usage: bootstrap/install.fish --stage core|profile [--profile NAME] [--aur-helper yay|paru] [--dry-run]"
     echo "                              [--approve-aur] [--noconfirm]"
     echo "       core migration:        [--migrate-legacy-links --legacy-link-journal ABSOLUTE_PATH]"
+    echo "                              [--deploy-prebuilt]"
     echo "       profile package batch: --package-group official.NAME|aur.NAME"
-    echo "       profile component sync: --sync-profile-components --approve-aur"
+    echo "       profile component sync: --sync-profile-components --approve-aur [--deploy-prebuilt]"
     echo "       explicit finishing:     --enable-service SERVICE | --approve-group GROUP"
 end
 
@@ -77,6 +80,8 @@ while test $i -le (count $argv)
             set legacy_link_journal $argv[$i]
         case --sync-profile-components
             set sync_profile_components 1
+        case --deploy-prebuilt
+            set deploy_prebuilt 1
         case '--package-group=*'
             set -a package_groups (string replace -- '--package-group=' '' $arg)
         case --package-group
@@ -163,6 +168,13 @@ else
     end
 end
 
+if test $deploy_prebuilt -eq 1
+    if test "$stage" = profile; and test $sync_profile_components -ne 1
+        echo "error: --deploy-prebuilt in the profile stage requires --sync-profile-components" >&2
+        exit 2
+    end
+end
+
 if test $migrate_legacy_links -eq 1; and test -z "$legacy_link_journal"
     echo "error: --migrate-legacy-links requires --legacy-link-journal ABSOLUTE_PATH" >&2
     exit 2
@@ -239,57 +251,6 @@ end
 
 function unique_values
     printf '%s\n' $argv | string match -rv '^$' | sort -u
-end
-
-function package_version --argument-names package
-    set -l query (pacman -Q -- "$package" 2>/dev/null)
-    if test $status -ne 0
-        return 1
-    end
-    string split ' ' -f 2 -- "$query"
-end
-
-function validate_same_installed_version --argument-names label
-    set -l packages $argv[2..-1]
-    set -l reference_version
-    set -l installed
-
-    for package in $packages
-        set -l value (package_version "$package")
-        if test $status -ne 0; or test -z "$value"
-            echo "error: $label validation requires installed package '$package'" >&2
-            return 1
-        end
-        set -a installed "$package=$value"
-        if test -z "$reference_version"
-            set reference_version "$value"
-        else if test "$value" != "$reference_version"
-            echo "error: $label version mismatch: "(string join ', ' $installed) >&2
-            return 1
-        end
-    end
-end
-
-function validate_fully_updated
-    if test "$bootstrap_dry_run" -eq 1
-        log "would require pacman -Qu to report no pending official upgrades"
-        return 0
-    end
-
-    set -l pending (pacman -Qu 2>/dev/null)
-    set -l query_status $status
-    if test $query_status -ne 0
-        echo "error: pacman could not determine whether official upgrades are pending" >&2
-        return 1
-    end
-    if test (count $pending) -gt 0
-        echo "error: pending official upgrades detected; perform the separately gated full Arch upgrade and reboot first" >&2
-        printf '  %s\n' $pending >&2
-        return 1
-    end
-
-    validate_same_installed_version NetworkManager/libnm networkmanager libnm; or return 1
-    validate_same_installed_version "GCC runtime" gcc gcc-libs libgcc libstdc++ lib32-gcc-libs; or return 1
 end
 
 function require_tty
@@ -522,7 +483,30 @@ end
 
 validate_fully_updated; or exit 1
 
-if test (count $official_targets) -gt 0
+set -l expected_prebuilt_revision
+if test $deploy_prebuilt -eq 1
+    set expected_prebuilt_revision (/usr/bin/git -C "$root" rev-parse HEAD)
+    if test $status -ne 0; or test -z "$expected_prebuilt_revision"
+        echo "error: could not resolve the exact candidate revision" >&2
+        exit 1
+    end
+    if test "$bootstrap_dry_run" -eq 0
+        set -l candidate_changes (/usr/bin/git -C "$root" status --porcelain --untracked-files=all)
+        if test $status -ne 0
+            echo "error: could not verify the candidate worktree" >&2
+            exit 1
+        end
+        if test (count $candidate_changes) -gt 0
+            echo "error: --deploy-prebuilt requires a clean candidate worktree" >&2
+            printf '  %s\n' $candidate_changes >&2
+            exit 1
+        end
+    end
+end
+
+if test $deploy_prebuilt -eq 1
+    log "package transactions are deferred; the prebuilt deployer will require every manifest package to be installed"
+else if test (count $official_targets) -gt 0
     set -l pacman_args pacman -S --needed
     if test "$bootstrap_noconfirm" -eq 1
         set -a pacman_args --noconfirm
@@ -530,7 +514,7 @@ if test (count $official_targets) -gt 0
     sudo_run_inhibited $pacman_args $official_targets; or exit 1
 end
 
-if test (count $aur_targets) -gt 0
+if test $deploy_prebuilt -eq 0; and test (count $aur_targets) -gt 0
     install_aur_helper "$aur_helper"; or exit 1
     install_aur_packages "$aur_helper" $aur_targets; or exit 1
 end
@@ -624,11 +608,21 @@ except BaseException:
         set -g cutover_legacy_journal "$legacy_link_journal"
     end
 
-    set -l install_args install --aur-helper "$aur_helper" --enable-components (string join , $selected_components)
-    if test "$bootstrap_noconfirm" -eq 1
-        set -a install_args --noconfirm
+    if test $deploy_prebuilt -eq 1
+        set -l deploy_args "$root/bootstrap/apply-prebuilt.py" \
+            --expected-revision "$expected_prebuilt_revision" \
+            --expected-url "$dots_url" \
+            --expected-branch "$dots_branch" \
+            --aur-helper "$aur_helper" \
+            --enable-components (string join , $selected_components)
+        run_inhibited env PATH=/usr/bin:/bin PYTHONNOUSERSITE=1 PYTHONPATH= /usr/bin/python -I $deploy_args
+    else
+        set -l install_args install --aur-helper "$aur_helper" --enable-components (string join , $selected_components)
+        if test "$bootstrap_noconfirm" -eq 1
+            set -a install_args --noconfirm
+        end
+        run_inhibited caelestia $install_args
     end
-    run_inhibited caelestia $install_args
     set -l install_status $status
     if test $install_status -ne 0
         rollback_cutover

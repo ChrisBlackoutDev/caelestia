@@ -13,6 +13,7 @@
 .SRCINFO
 !bootstrap/pkgbuilds/caelestia-shell-fork/.SRCINFO
 !bootstrap/pkgbuilds/sddm-pixel-sakura/.SRCINFO
+!packages/caelestia-firefox-theme/.SRCINFO
 
 bootstrap/pkgbuilds/*/src/
 bootstrap/pkgbuilds/*/pkg/

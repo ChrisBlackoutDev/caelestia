@@ -40,6 +40,12 @@ fish bootstrap/install.fish --stage core --approve-aur \
   --legacy-link-journal /home/kensa/caelestia-migration-2026-09-07/work/legacy-link-journal
 ```
 
+A release controller that has already installed exact reviewed package
+archives uses `--deploy-prebuilt` with the same migration arguments. That mode
+validates all required package names and local-package versions, deploys the
+managed configuration, and writes Caelestia CLI state without rebuilding or
+installing packages.
+
 The journal must already exist beneath the target user's home, must not be a symlink, and must be owned by that user. It is retry state, not a backup: saved links, an expected-link manifest, and any recoverably quarantined partial replacements remain there for inspection. Only the 11 target-specific links with exact expected targets are moved. Unexpected regular files or link targets stop the first run. An interrupted retry recognizes exact saved links, and any failed rollback moves partial managed replacements into a timestamped recovery tree before restoring the legacy links. Successful replacement validation writes `COMPLETED`; the bootstrap refuses to reuse that journal for another cutover.
 
 ## 3. Install profile package batches
@@ -63,6 +69,10 @@ Install every category returned by that command, including both terminal-toy gro
 ```sh
 fish bootstrap/install.fish --stage profile --sync-profile-components --approve-aur
 ```
+
+Use `--deploy-prebuilt` on this component sync as well when the complete
+profile package set and the exact three local-package archives were installed
+by a release controller beforehand.
 
 The sync refuses to run while any declared profile package is missing. Supplying the complete component list in one operation prevents Caelestia CLI state from forgetting an earlier optional component.
 

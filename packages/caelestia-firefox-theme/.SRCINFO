@@ -1,0 +1,13 @@
+pkgbase = caelestia-firefox-theme
+	pkgdesc = The native app component of the CaelestiaFox Firefox theme
+	pkgver = 1.0.0
+	pkgrel = 1
+	url = https://github.com/caelestia-dots/caelestia
+	install = message.install
+	arch = any
+	license = GPL-3.0-only
+	depends = fish
+	depends = jq
+	depends = inotify-tools
+
+pkgname = caelestia-firefox-theme

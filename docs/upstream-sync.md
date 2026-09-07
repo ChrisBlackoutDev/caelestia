@@ -42,3 +42,9 @@ Push only the new refresh branch. Do not rewrite the fork's default branch as pa
 ## Bootstrap contract
 
 `bootstrap/install.fish` requires `--stage core` or `--stage profile`. Core is the only stage allowed to migrate the exact legacy links. Profile work accepts exactly one transaction per invocation: one `--package-group`, one cumulative `--sync-profile-components`, one named service, or one named group. The script never upgrades Arch, performs implicit recursive package cleanup, discovers arbitrary legacy links, writes unowned SDDM files or sudoers rules, or performs live noninteractive transactions. Provider conflicts such as `quickshell-git` replacing `quickshell` and `caelestia-shell-fork` replacing a stock shell package require an explicitly reviewed gated package transaction.
+
+`--deploy-prebuilt` is the release-controller path: it skips all package
+transactions, requires every selected manifest package and exact local package
+version to be present, requires the managed checkout to equal the executing
+candidate's full commit, then performs only hooks, file deployment, and state
+recording.

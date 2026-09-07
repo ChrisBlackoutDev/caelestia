@@ -2,8 +2,8 @@
 Type=Application
 Name=Cursor
 Comment=AI code editor
-Exec=caelestia-cursor %U
-TryExec=caelestia-cursor
+Exec=/home/kensa/.local/bin/caelestia-cursor %U
+TryExec=/home/kensa/.local/bin/caelestia-cursor
 Icon=cursor
 Terminal=false
 Categories=Development;IDE;

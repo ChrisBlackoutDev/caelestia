@@ -1,6 +1,6 @@
 pkgbase = caelestia-firefox-theme
-	pkgdesc = The native app component of the CaelestiaFox Firefox theme
-	pkgver = 1.0.0
+	pkgdesc = CaelestiaFox Firefox extension and native messaging host
+	pkgver = 2.0.0
 	pkgrel = 1
 	url = https://github.com/caelestia-dots/caelestia
 	install = message.install
@@ -9,5 +9,7 @@ pkgbase = caelestia-firefox-theme
 	depends = fish
 	depends = jq
 	depends = inotify-tools
+	source = caelestiafox-2.0.0.xpi::https://addons.mozilla.org/firefox/downloads/file/4514382/caelestiafox-2.0.xpi
+	sha256sums = 3e545665b91e0c86a3e6cd053be412c2a0f936d7524af5d5676ec2fbf6fc5b17
 
 pkgname = caelestia-firefox-theme

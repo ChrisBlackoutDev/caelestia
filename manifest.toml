@@ -72,7 +72,25 @@ dest = "$XDG_CONFIG_HOME/micro"
 [[components]]
 name = "thunar"
 default = true
-packages = ["thunar", "tumbler", "ffmpegthumbnailer", "poppler-glib", "libgsf", "webp-pixbuf-loader"]
+packages = [
+    "thunar",
+    "thunar-volman",
+    "tumbler",
+    "ffmpegthumbnailer",
+    "poppler-glib",
+    "libgsf",
+    "webp-pixbuf-loader",
+    "gst-thumbnailers",
+    "gst-plugins-good",
+    "gst-plugins-bad",
+    "gst-plugins-ugly",
+    "gst-libav",
+    "gvfs",
+    "gvfs-mtp",
+    "gvfs-gphoto2",
+    "exfatprogs",
+    "dosfstools",
+]
 [[components.entries]]
 src = "thunar/uca.xml"
 dest = "$XDG_CONFIG_HOME/Thunar/uca.xml"
@@ -157,7 +175,7 @@ dest = "$XDG_CONFIG_HOME/mozilla/firefox/*.default*/user.js"
 [[components]]
 name = "gtk"
 default = true
-packages = ["adw-gtk-theme", "papirus-icon-theme", "papirus-folders"]
+packages = ["adw-gtk-theme", "papirus-icon-theme", "papirus-folders", "sweet-cursors-git"]
 
 [[components]]
 name = "qt"
@@ -222,6 +240,8 @@ packages = [
     "ydotool",
     "hyprpicker",
     "xdg-user-dirs",
+    "gammastep",
+    "geoclue",
 ]
 post_install = ["xdg-user-dirs-update"]
 
@@ -230,7 +250,7 @@ post_install = ["xdg-user-dirs-update"]
 
 [[components]]
 name = "spotify"
-packages = ["spotify", "spicetify-cli", "spicetify-marketplace-bin"]
+packages = ["spotify", "spicetify-cli", "spicetify-marketplace-bin", "acl"]
 post_install = [
     "spicetify config current_theme caelestia color_scheme caelestia custom_apps marketplace",
     "spicetify apply",

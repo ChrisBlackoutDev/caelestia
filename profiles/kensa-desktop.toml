@@ -140,6 +140,7 @@ packages = [
     "docker-buildx",
     "docker-compose",
     "github-cli",
+    "less",
     "neovim",
     "fd",
     "ripgrep",

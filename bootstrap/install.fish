@@ -192,6 +192,7 @@ end
 
 set -g bootstrap_dry_run $dry_run
 set -g bootstrap_noconfirm $noconfirm
+set -g bootstrap_approve_aur $approve_aur
 
 function log
     printf '[bootstrap] %s\n' "$argv"
@@ -277,7 +278,7 @@ function install_aur_helper --argument-names helper
     if command -q "$helper"
         return 0
     end
-    if test "$bootstrap_dry_run" -eq 0; and test $approve_aur -ne 1
+    if test "$bootstrap_dry_run" -eq 0; and test $bootstrap_approve_aur -ne 1
         echo "error: --approve-aur is required before building an AUR helper" >&2
         return 1
     end
@@ -315,7 +316,7 @@ function install_aur_packages --argument-names helper
     if test (count $packages) -eq 0
         return 0
     end
-    if test "$bootstrap_dry_run" -eq 0; and test $approve_aur -ne 1
+    if test "$bootstrap_dry_run" -eq 0; and test $bootstrap_approve_aur -ne 1
         echo "error: --approve-aur is required after reviewing every requested AUR PKGBUILD" >&2
         return 1
     end
@@ -426,7 +427,7 @@ switch "$stage"
                 set aur_targets (unique_values $group_packages)
             end
         else if test $sync_profile_components -eq 1
-            if test "$bootstrap_dry_run" -eq 0; and test $approve_aur -ne 1
+            if test "$bootstrap_dry_run" -eq 0; and test $bootstrap_approve_aur -ne 1
                 echo "error: --sync-profile-components requires --approve-aur after reviewing all component and local-package sources" >&2
                 exit 2
             end

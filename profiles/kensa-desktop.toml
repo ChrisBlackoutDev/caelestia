@@ -5,7 +5,7 @@ user = "kensa"
 
 [caelestia]
 dots_url = "https://github.com/ChrisBlackoutDev/caelestia.git"
-dots_branch = "codex/upstream-refresh-2026-09-07"
+dots_branch = "codex/upstream-refresh-2026-09-16"
 aur_helper = "yay"
 core_components = [
     "hypr",

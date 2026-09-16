@@ -15,7 +15,7 @@ After reconnecting, install only the checkout prerequisites:
 
 ```sh
 sudo pacman -S --needed git fish
-git clone --branch codex/upstream-refresh-2026-09-07 \
+git clone --branch codex/upstream-refresh-2026-09-16 \
   https://github.com/ChrisBlackoutDev/caelestia.git \
   ~/src/caelestia
 cd ~/src/caelestia

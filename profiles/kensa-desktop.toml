@@ -17,6 +17,7 @@ core_components = [
     "thunar",
     "caelestia",
     "app-launchers",
+    "personal",
     "starship",
     "firefox",
     "gtk",
@@ -40,6 +41,7 @@ enable_components = [
     "thunar",
     "caelestia",
     "app-launchers",
+    "personal",
     "terminal-toys",
     "starship",
     "firefox",
@@ -52,12 +54,11 @@ enable_components = [
     "clipboard",
     "fonts",
     "tools",
-    "vscode",
+    "spotify",
+    "vscodium",
+    "discord",
     "todoist",
     "uwsm",
-    "zen",
-    "nvim",
-    "sddm-personal",
 ]
 
 [packages.official.core]
@@ -208,7 +209,7 @@ purpose = "AUR commands used by the optional terminal-toys component"
 packages = ["tty-clock", "pipes.sh"]
 
 [services]
-requested = ["NetworkManager", "bluetooth", "cups", "docker", "tailscaled", "mullvad-daemon", "sddm"]
+requested = ["NetworkManager", "bluetooth", "cups", "docker", "tailscaled", "mullvad-daemon"]
 
 [display_manager.sddm]
 theme = "pixel-sakura"

@@ -107,6 +107,25 @@ src = "bin/caelestia-cursor"
 dest = "$HOME/.local/bin/caelestia-cursor"
 
 [[components]]
+name = "personal"
+default = true
+post_install = [
+    "for dir in assets components modules services utils; do ln -sfn /etc/xdg/quickshell/caelestia/$dir ${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/caelestia-ai/$dir; done",
+]
+post_update = [
+    "for dir in assets components modules services utils; do ln -sfn /etc/xdg/quickshell/caelestia/$dir ${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/caelestia-ai/$dir; done",
+]
+[[components.entries]]
+src = "quickshell/caelestia-ai"
+dest = "$XDG_CONFIG_HOME/quickshell/caelestia-ai"
+[[components.entries]]
+src = "quickshell/caelestia-ai/bin/caelestia-ai-agent"
+dest = "$HOME/.local/bin/caelestia-ai-agent"
+[[components.entries]]
+src = "quickshell/caelestia-ai/bin/caelestia-ai-settings"
+dest = "$HOME/.local/bin/caelestia-ai-settings"
+
+[[components]]
 name = "terminal-toys"
 default = false
 packages = ["tty-clock", "cmatrix", "pipes.sh", "cava", "python", "jq"]

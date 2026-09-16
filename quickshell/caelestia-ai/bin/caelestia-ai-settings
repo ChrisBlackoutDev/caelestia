@@ -1,0 +1,143 @@
+#!/usr/bin/env python3
+
+"""Read and update the local settings used by the Caelestia AI panel."""
+
+from __future__ import annotations
+
+import json
+import os
+import sys
+import tempfile
+from pathlib import Path
+from typing import Any
+
+
+DEFAULTS: dict[str, Any] = {
+    "model": "qwen/qwen-2.5-coder-32b-instruct",
+    "temperature": 0.4,
+    "maxContextMessages": 18,
+    "customInstructions": (
+        "You are a concise AI helper embedded in a Hyprland desktop panel. "
+        "Chat only. Do not claim to run commands, edit files, or inspect the system."
+    ),
+}
+
+
+def config_path() -> Path:
+    base = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
+    return base / "caelestia" / "ai.json"
+
+
+def load_settings() -> dict[str, Any]:
+    path = config_path()
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        value = {}
+    except (OSError, json.JSONDecodeError) as error:
+        raise ValueError(f"Could not read {path}: {error}") from error
+
+    if not isinstance(value, dict):
+        raise ValueError(f"{path} must contain a JSON object")
+
+    return {**DEFAULTS, **value}
+
+
+def public_settings(settings: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "model": settings["model"],
+        "temperature": settings["temperature"],
+        "maxContextMessages": settings["maxContextMessages"],
+        "customInstructions": settings["customInstructions"],
+        "apiKeySet": bool(settings.get("apiKey") or os.environ.get("OPENROUTER_API_KEY")),
+    }
+
+
+def validated_update(current: dict[str, Any], value: Any) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise ValueError("settings must be a JSON object")
+
+    model = str(value.get("model", current["model"])).strip()
+    instructions = str(value.get("customInstructions", current["customInstructions"])).strip()
+    if not model:
+        raise ValueError("model cannot be empty")
+    if not instructions:
+        raise ValueError("custom instructions cannot be empty")
+
+    try:
+        temperature = float(value.get("temperature", current["temperature"]))
+        context = int(value.get("maxContextMessages", current["maxContextMessages"]))
+    except (TypeError, ValueError) as error:
+        raise ValueError("temperature and context size must be numbers") from error
+
+    if not 0 <= temperature <= 2:
+        raise ValueError("temperature must be between 0 and 2")
+    if not 1 <= context <= 100:
+        raise ValueError("context size must be between 1 and 100")
+
+    updated = {
+        **current,
+        "model": model,
+        "temperature": temperature,
+        "maxContextMessages": context,
+        "customInstructions": instructions,
+    }
+
+    if bool(value.get("clearApiKey")):
+        updated.pop("apiKey", None)
+    else:
+        api_key = str(value.get("apiKey", "")).strip()
+        if api_key:
+            updated["apiKey"] = api_key
+
+    return updated
+
+
+def save_settings(settings: dict[str, Any]) -> None:
+    path = config_path()
+    path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    os.chmod(path.parent, 0o700)
+
+    descriptor, temporary = tempfile.mkstemp(prefix=".ai.json.", dir=path.parent, text=True)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
+            json.dump(settings, stream, indent=2, ensure_ascii=False)
+            stream.write("\n")
+        os.chmod(temporary, 0o600)
+        os.replace(temporary, path)
+    finally:
+        try:
+            os.unlink(temporary)
+        except FileNotFoundError:
+            pass
+
+
+def respond(payload: dict[str, Any]) -> dict[str, Any]:
+    action = payload.get("action", "load")
+    settings = load_settings()
+    if action == "save":
+        settings = validated_update(settings, payload.get("settings"))
+        save_settings(settings)
+    elif action != "load":
+        raise ValueError(f"unsupported action: {action}")
+
+    return {"ok": True, "settings": public_settings(settings)}
+
+
+def main() -> int:
+    try:
+        payload = json.loads(sys.stdin.readline() or "{}")
+        if not isinstance(payload, dict):
+            raise ValueError("request must be a JSON object")
+        result = respond(payload)
+    except (OSError, ValueError, json.JSONDecodeError) as error:
+        result = {"ok": False, "error": str(error)}
+        print(json.dumps(result, ensure_ascii=False))
+        return 1
+
+    print(json.dumps(result, ensure_ascii=False))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

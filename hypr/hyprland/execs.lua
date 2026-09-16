@@ -27,6 +27,9 @@ hl.on("hyprland.start", function()
 
     -- Start shell
     hl.exec_cmd("caelestia shell -d")
+
+    -- Start the personal top-right chat helper panel.
+    hl.exec_cmd("qs -c caelestia-ai")
 end)
 
 -- Resizer listeners

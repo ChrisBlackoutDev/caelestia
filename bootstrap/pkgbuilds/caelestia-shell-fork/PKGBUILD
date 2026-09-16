@@ -1,7 +1,7 @@
 # Maintainer: ChrisBlackoutDev
 
 pkgname=caelestia-shell-fork
-pkgver=2.4.0.r33.g8d020905
+pkgver=2.4.0.r64.g88f1f969
 pkgrel=1
 pkgdesc='Caelestia desktop shell with ChrisBlackoutDev customizations'
 arch=('x86_64')
@@ -41,7 +41,7 @@ makedepends=('git' 'cmake' 'ninja' 'qt6-shadertools')
 provides=("caelestia-shell=$pkgver")
 conflicts=('caelestia-shell' 'caelestia-shell-git')
 
-_commit='8d0209056f475d8d143f4bd74883650de7793f5d'
+_commit='88f1f9695ae8cff159a66ec39686bc8be99dd12a'
 source=("$pkgname::git+$url.git#commit=$_commit")
 sha256sums=('SKIP')
 

@@ -135,9 +135,13 @@ tagged_rule(xwl_popup_tag, {
 tagged_rule(system_monitor_tag, { "btop" }, "class")
 tagged_rule(music_player_tag, {
     "feishin|Supersonic|Plexamp",                                  -- Self hosted
+    "Spotify",                                                     -- Spotify
     "Cider",                                                       -- Apple music
     "com.github.th-ch.youtube-music|com-maxrave-simpmusic-MainKt", -- YouTube music
 }, "class")
+tagged_rule(music_player_tag, {
+    "Spotify|Spotify Free" -- Spotify wayland, it has no class for some reason
+}, "initial_title")
 tagged_rule(communication_app_tag, {
     "discord|equibop|vesktop", -- Discord clients
     "whatsapp"                 -- Whatsapp
@@ -155,6 +159,13 @@ tagged_rule(todo_app_tag, {
 hl.window_rule({ match = { class = "steam" }, rounding = math.min(10, vars.windowRounding) })
 tagged_rule(float_tag, { { class = "steam", title = "Friends List" } })
 tagged_rule(xwl_popup_tag, { { class = "steam", title = "" } })
+
+-- Succubus Prison's fixed-size startup renderer stalls when tiled and resized.
+hl.window_rule({
+    match  = { class = "steam_app_0", initial_title = "Succubus Prison.*System Start-up.*" },
+    float  = true,
+    center = true,
+})
 
 -- Ueberzugpp
 hl.window_rule({ match = { class = "ueberzugpp_.*" }, float = true, no_initial_focus = true })

@@ -51,13 +51,10 @@ local function extend_keybind(base, suffix)
 end
 
 -- Launcher
-local launcher_default = normalise_keybind("SUPER + SUPER_L")
 create_bind(
     vars.kbLauncher,
     hl.dsp.global("caelestia:launcher"),
-    function(key)
-        return normalise_keybind(key) == launcher_default and release or nil
-    end
+    { release = true, dont_inhibit = true, allow_input_capture = true }
 )
 create_bind({
     "SUPER + mouse:272",

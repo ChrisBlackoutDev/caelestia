@@ -44,5 +44,6 @@
     "python.languageServer": "Pylance",
     "editor.inlayHints.enabled": "off",
     "qt-qml.qmlls.customExePath": "/usr/bin/qmlls6",
-    "qt-qml.doNotAskForQmllsDownload": true
+    "qt-qml.doNotAskForQmllsDownload": true,
+    "chatgpt.followUpQueueMode": "queue"
 }

@@ -12,6 +12,7 @@
             "timeouts": [
                 {
                     "idleAction": "lock",
+                    "inhibitWhenCharging": true,
                     "timeout": 1800
                 },
                 {
@@ -23,6 +24,7 @@
                     "idleAction": [
                         "suspendThenHibernate"
                     ],
+                    "inhibitWhenCharging": true,
                     "timeout": 3600
                 }
             ]
